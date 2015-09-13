@@ -13,18 +13,43 @@
 				return gzinflate(substr($data,10,-8)); 
 			} 
 		}
+		$url = "https://gist.githubusercontent.com/zealic/38510fd8ecd1be75924a/raw/27ac7ef5d3d7dd70d83e3cd2b5049e239e4dba72/0x8B1F";
+		#$url = "https://gist.githubusercontent.com/zealic/38510fd8ecd1be75924a/raw/27ac7ef5d3d7dd70d83e3cd2b5049e239e4dba72/0x8B1F";
+		$que = file_get_contents($url);
 
-		$res = gzdecode(base64_decode('H4sIAAAAAAAAAzPUUwjJSFVIzCsuTy1SKMlXyMlMS9VRKAGKleZllqUWFQN5iXkpCqlAdmVJRmZe uh4vFy+XkZ5Chaubk5tOhZOLK4h0c3J5v2f2sxnrn+xoeLls2pPdDU92drxYP/1xQxNIvbGegltm UXGJQpCbs0JeaW4S0Lb8NIWC/KISBWdzIwtHE0tjM2NnS0dLY0cTY0dzV3M3I2MjJ1NHUxNHkH4r N08/Rx9eLkeoQ4HuKyxNLS7JzM8r1lFwzs8rSUwuUfDMK8ssSU21UkhNzgB6Jb8sVTc5PwWovkYh xNMvMjTIBwDO8n7C8AAAAA=='));  
+		echo $que;
+		
+		echo "<br><br><br> answer1 is:<br>";
+		$res = base64_decode($que);
+		echo base_convert(ord($res[0]),10,16);
+		echo base_convert(ord($res[1]),10,16);
+		echo "<br>";
 		echo "$res";
-		echo "<br><br><br>";
-		echo "answer:";
+		echo "<br><br>";
+		$res = gzdecode($res);
+		echo "$res";
+		
+		echo "<br><br><br> answer2 is:<br>";
+		$que = 	"/Td6WFoAAATm1rRGAgAhARYAAAB0L+Wj4AFRAQVdABGICqfJeJWaXR0sjwRpdS7E +6IpZ7jEgwnjNXF1I+Am53CER4uNimC3eWr2cLkUF4wS790hhcFJDPibD3E6vykU wfVcZtkxf49xh2iethSwFIx3fmnT/Qzol3c2NzHNLm08op6oj6c6IymXQoTGUfjt QMm4Q8yuiGCX2iLAqUsg/SFnJNb1G4QuOWCVZSQwrNnHoZnAsJjXKdxW82xVSI5H T2GH19HrQWj7mAIv2hEG7rHr7Lvc5KrtVPN4+jGZQPbvWM4Mh+Sjx/wTyxQ14MW/ FgSVKDir3PXIfM3/4bPggO6EQc3KOgNzQl+E5ePAoI0wNh+KEohXqYVt4giRNm52 ypAgAAAAAAC8TejHH4hG6QABoQLSAgAAiuAM5LHEZ/sCAAAAAARZWg==";
+		$res = base64_decode($que);
+		echo base_convert(ord($res[0]),10,16);
+		echo base_convert(ord($res[1]),10,16);
 		echo "<br>";
-		echo "1. 42 (answer also appears in <a href=https://geekpower.taobao.com/?spm=a1z10.1-c.0.0.QWbTev> Geek Power创意工作室 </a> (๑⊙ლ⊙))";
-		echo "<br>";
-		echo "2. 锟斤拷 (刚一谷歌就找到了遍地的答案。。。这个题火了。。。)";
-		echo "<br>";
-		echo "3. 21 (https://en.wikipedia.org/wiki/File_Transfer_Protocol)";
-		echo "<br>";
+		echo "$res";		
+		echo "<br><br>";		
+		$fileName = "code-lover.tar.xz";
+		if ($fp = fopen($fileName, "w+")) {
+			if (@fwrite($fp, $res)) {
+				fclose($fp);
+				return true;
+			} else {
+				echo "NANI!!!";
+				fclose($fp);
+				return false;
+			} 
+		}  		
+		echo "$res";
+
 		?>
 	</body>
 </html>
