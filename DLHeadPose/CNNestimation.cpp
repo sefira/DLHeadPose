@@ -31,7 +31,7 @@ int ResizeImage(cv::Mat img, double minv, double maxv,
 	{
 		for (int j = 0; j < resized.size().height; j++)
 		{
-			//Task
+			//TODO the "255 - " just needed in lecun-weights
 			double temp = (255 - resized[i][j]) * (maxv - minv) / 255.0 + minv;
 			data.push_back(temp);
 		}
@@ -78,6 +78,8 @@ int Recognize(const std::string& dictionary) {
 		<< convolutional_layer<tan_h>(14, 14, 5, 6, 16)
 		<< average_pooling_layer<tan_h>(10, 10, 16, 2)
 		<< convolutional_layer<tan_h>(5, 5, 5, 16, 120)
+		//TODO output should be 2
+		//which is yaw and pitch
 		<< fully_connected_layer<tan_h>(120, 10);
 
 	// load nets
