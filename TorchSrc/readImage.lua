@@ -3,6 +3,9 @@ require 'image'   -- for color transforms
 require 'nn'      -- provides a normalization operator
 require 'gnuplot' -- display a image
 --gmagent = require 'graphicsmagick'
+
+----------------------------------------------------------------------
+
 --see if the file exists
 function file_exists(file)
 	local f = io.open(file, "rb")
@@ -32,7 +35,8 @@ for i = 1, #train_txt do
 	local train_image = torch.Tensor(width, height) 
 	local train_labels = torch.Tensor(2) -- yaw and pitch
 	local imageread = image.load("../data/" .. train_txt[i])
-	train_image = imageread
+	print(imageread:max())
+	train_image = imageread:mul(2):mul(1/255):add(-1)
 	local res = {}
 	--s = "1.3 3.5 xingyuan/sfalskdf/45.jpg"
 	for v in string.gmatch(train_txt, "[^%s]+") do
@@ -42,8 +46,10 @@ for i = 1, #train_txt do
 	train_labels[2] = res[2] -- pitch
 	
 	local train_data_temp = {
-		data = train_image:float(),
-		labels = train_labels:float()
+		--data = train_image:float(),
+		--labels = train_labels:float()
+		data = train_image:cuda(),
+		labels = train_labels:cuda()
 	}
 	train_data[#train_data + 1] = train_data_temp
 	if(i % 100 == 0) then
@@ -58,7 +64,7 @@ for i = 1, #test_txt do
 	local test_image = torch.Tensor(width, height) 
 	local test_labels = torch.Tensor(2) -- yaw and pitch
 	local imageread = image.load("../data/" .. test_txt[i])
-	test_image = imageread
+	test_image = imageread:mul(2):mul(1/255):add(-1)
 	local res = {}
 	--s = "1.3 3.5 xingyuan/sfalskdf/45.jpg"
 	for v in string.gmatch(test_txt, "[^%s]+") do
@@ -68,8 +74,10 @@ for i = 1, #test_txt do
 	test_labels[2] = res[2] -- pitch
 	
 	local test_data_temp = {
-		data = test_image:float(),
-		labels = test_labels:float()
+		--data = test_image:float(),
+		--labels = test_labels:float()
+		data = test_image:cuda(),
+		labels = test_labels:cuda()
 	}
 	test_data[#test_data + 1] = test_data_temp
 	if(i % 100 == 0) then
@@ -79,14 +87,6 @@ end
 
 trsize = #train_txt
 tesize = #test_lines
-
-
-
-
-
-
-
-
 
 
 

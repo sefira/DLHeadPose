@@ -80,7 +80,7 @@ int Recognize(const std::string& dictionary) {
 		<< convolutional_layer<tan_h>(5, 5, 5, 16, 120)
 		//TODO output should be 2
 		//which is yaw and pitch
-		<< fully_connected_layer<tan_h>(120, 10);
+		<< fully_connected_layer<tiny_cnn::activation::identity>(120, 2);
 
 	// load nets
 	ifstream ifs(dictionary.c_str());

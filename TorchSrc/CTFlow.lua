@@ -4,16 +4,15 @@ require 'torch'
 print '==> executing all'
 
 dofile 'readImage.lua'
-dofile 'defineNN.lua'
-dofile 'regression.lua'
-dofile 'throughNN.lua'
+dofile 'cnnModel.lua'
+dofile 'loss.lua'
+dofile 'train.lua'
 
-dofile 'trainData.lua'
-train()
-testinTrainData()
-
-dofile 'testData.lua'
-testinTestData()
+-- dofile 'test.lua'
+while true do
+   train()
+   test()
+end
 
 function equal(a,b)
 	res = torch.eq(a,b)
