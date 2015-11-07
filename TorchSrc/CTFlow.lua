@@ -1,17 +1,19 @@
 require 'torch'
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
+
 print '==> executing all'
 
 dofile 'readImage.lua'
 dofile 'cnnModel.lua'
 dofile 'loss.lua'
 dofile 'train.lua'
+dofile 'test.lua'
 
--- dofile 'test.lua'
 while true do
-   train()
-   test()
+	train()
+	--testInTrainData()
+	testInTestData()
 end
 
 function equal(a,b)

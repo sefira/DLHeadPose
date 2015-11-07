@@ -40,6 +40,7 @@ function train()
 	shuffle = torch.randperm(trsize)
 
 	-- do one epoch
+	current_loss = 0
 	print('==> doing epoch on training data:')
 	print("==> online epoch # " .. epoch .. ' [batchSize = ' .. batchSize .. ']')
 	for t = 1,trsize,batchSize do
@@ -95,13 +96,12 @@ function train()
 		_,fs = optimMethod(feval, parameters, optimState)
 		
 		-- this variable is used to estimate the average loss
-		current_loss = 0
 		current_loss = current_loss + fs[1]
 	end
 	
 	-- report average error on epoch
 	current_loss = current_loss / trsize
-	print('current loss = ' .. current_loss)
+	print("\n==> loss per sample = " .. (current_loss))
 
 	-- time taken
 	time = sys.clock() - time
