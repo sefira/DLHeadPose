@@ -1,3 +1,7 @@
+--------------------------------
+--TODO transforms tensor to cuda
+--------------------------------
+
 require 'torch'   -- torch
 require 'image'   -- for color transforms
 require 'nn'      -- provides a normalization operator
@@ -32,24 +36,25 @@ width = 32
 train_txt = read_file("../data/train.txt")
 train_data = {}
 for i = 1, #train_txt do
-	local train_image = torch.Tensor(width, height) 
-	local train_labels = torch.Tensor(2) -- yaw and pitch
-	local imageread = image.load("../data/" .. train_txt[i])
-	print(imageread:max())
-	train_image = imageread:mul(2):mul(1/255):add(-1)
+	local train_labels = torch.Tensor(2) -- pitch and yaw
 	local res = {}
-	--s = "1.3 3.5 xingyuan/sfalskdf/45.jpg"
-	for v in string.gmatch(train_txt, "[^%s]+") do
+	--s = "up_down/image0/1_1.jpg -45 0"
+	for v in string.gmatch(train_txt[i], "[^%s]+") do
 		res[#res + 1] = v
 	end
-	train_labels[1] = res[1] -- yaw
-	train_labels[2] = res[2] -- pitch
+	filename = res[1]
+	train_labels[1] = res[2] -- pitch
+	train_labels[2] = res[3] -- yaw
+	-- here need to mul(255) due to torch will auto mul(1/255) for a jpg
+	local imageread = image.load("../data/" .. filename):mul(255)
+	--print(imageread:max())
+	local train_image = imageread:mul(2):mul(1/255):add(-1)
 	
 	local train_data_temp = {
-		--data = train_image:float(),
-		--labels = train_labels:float()
-		data = train_image:cuda(),
-		labels = train_labels:cuda()
+		data = train_image:float(),
+		labels = train_labels:float()
+		--data = train_image:cuda(),
+		--labels = train_labels:cuda()
 	}
 	train_data[#train_data + 1] = train_data_temp
 	if(i % 100 == 0) then
@@ -61,23 +66,25 @@ end
 test_txt = read_file("../data/test.txt")
 test_data = {}
 for i = 1, #test_txt do
-	local test_image = torch.Tensor(width, height) 
-	local test_labels = torch.Tensor(2) -- yaw and pitch
-	local imageread = image.load("../data/" .. test_txt[i])
-	test_image = imageread:mul(2):mul(1/255):add(-1)
+	local test_labels = torch.Tensor(2) -- pitch and yaw
 	local res = {}
-	--s = "1.3 3.5 xingyuan/sfalskdf/45.jpg"
-	for v in string.gmatch(test_txt, "[^%s]+") do
+	--s = "up_down/image0/1_1.jpg -45 0"
+	for v in string.gmatch(test_txt[i], "[^%s]+") do
 		res[#res + 1] = v
 	end
-	test_labels[1] = res[1] -- yaw
-	test_labels[2] = res[2] -- pitch
+	filename = res[1]
+	test_labels[1] = res[2] -- pitch
+	test_labels[2] = res[3] -- yaw
+	-- here need to mul(255) due to torch will auto mul(1/255) for a jpg
+	local imageread = image.load("../data/" .. filename):mul(255)
+	--print(imageread:max())
+	local test_image = imageread:mul(2):mul(1/255):add(-1)
 	
 	local test_data_temp = {
-		--data = test_image:float(),
-		--labels = test_labels:float()
-		data = test_image:cuda(),
-		labels = test_labels:cuda()
+		data = test_image:float(),
+		labels = test_labels:float()
+		--data = test_image:cuda(),
+		--labels = test_labels:cuda()
 	}
 	test_data[#test_data + 1] = test_data_temp
 	if(i % 100 == 0) then
@@ -86,7 +93,7 @@ for i = 1, #test_txt do
 end
 
 trsize = #train_txt
-tesize = #test_lines
+tesize = #test_txt
 
 
 

@@ -1,3 +1,7 @@
+--------------------------------
+--TODO transforms tensor to cuda
+--------------------------------
+
 require 'torch'
 require 'nn'
 require 'cunn'
