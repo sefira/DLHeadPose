@@ -4,13 +4,13 @@
 #include "tiny_cnn.h"
 
 //#define VISUALIZE
-#define FOR_VIDEO
+//#define FOR_VIDEO
 
 using namespace tiny_cnn;
 using namespace tiny_cnn::activation;
 using namespace std;
 
-cv::VideoCapture m_videocapture = cv::VideoCapture(0);
+cv::VideoCapture m_videocapture;
 
 // convert tiny_cnn::image to cv::Mat and resize
 cv::Mat Image2Mat(image<>& img) {
@@ -32,7 +32,7 @@ int ResizeImage(cv::Mat img, double minv, double maxv,
 		for (int j = 0; j < resized.size().height; j++)
 		{
 			//TODO the "255 - " just needed in lecun-weights
-			double temp = (255 - resized[i][j]) * (maxv - minv) / 255.0 + minv;
+			double temp = (resized[i][j]) * (maxv - minv) / 255.0 + minv;
 			data.push_back(temp);
 		}
 	}
@@ -89,6 +89,7 @@ int Recognize(const std::string& dictionary) {
 	vec_t data;
 	///////////////for video/////////////////////////////
 #ifdef FOR_VIDEO
+	m_videocapture = cv::VideoCapture(0);
 	while (1)
 	{
 		vec_t().swap(data);
@@ -110,7 +111,7 @@ int Recognize(const std::string& dictionary) {
 
 	///////////////for picture//////////////////////////////
 #ifndef FOR_VIDEO
-	GetImageDataFromPicture("4.bmp", data);
+	GetImageDataFromPicture("1_1.jpg", data);
 	// recognize
 	auto res = nn.predict(data);
 	vector<pair<double, int> > scores;
@@ -148,6 +149,6 @@ int main(int argc, char** argv) {
 		cout << "please specify image file" << endl;;
 		//return 0;
 	}
-	Recognize("LeNet-weights");
+	Recognize("xbu-weights");
 	return 0;
 }
