@@ -1,0 +1,4 @@
+down_down\image0\1_1.jpg
+down_up\image-30\1_1.jpg
+up_down\image45\1_1.jpg
+up_up\image60\1_1.jpg
