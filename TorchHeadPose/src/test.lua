@@ -12,10 +12,10 @@ function testInTrainData()
 
 	-- set model to evaluate mode (for modules that differ in training and testing, like Dropout)
 	model:evaluate()
-	local loss = 0
+	local loss = torch.Tensor(2):fill(0)
 	
 	-- test over test data
-	print('==> testing on train set:')
+	print('\n==> testing on train set:')
 	for t = 1,trsize do
 		-- disp progress
 		xlua.progress(t, trsize)
@@ -28,7 +28,8 @@ function testInTrainData()
 		local pred = model:forward(input)
 		loss = loss + torch.abs(target - pred)
 	end
-	print("\n==> loss per sample = " .. (loss / trsize) .. 'ms')
+	print("\n==> loss per sample in pitch= " .. (loss[1] / tesize))
+	print("==> loss per sample in yaw= " .. (loss[2] / tesize))
 
 	-- timing
 	time = sys.clock() - time
@@ -43,10 +44,10 @@ function testInTestData()
 
 	-- set model to evaluate mode (for modules that differ in training and testing, like Dropout)
 	model:evaluate()
-	local loss = 0
+	local loss = torch.Tensor(2):fill(0)
 
 	-- test over test data
-	print('==> testing on test set:')
+	print('\n==> testing on test set:')
 	for t = 1,tesize do
 		-- disp progress
 		xlua.progress(t, tesize)
@@ -59,8 +60,9 @@ function testInTestData()
 		local pred = model:forward(input)
 		loss = loss + torch.abs(target - pred)
 	end
-	print("\n==> loss per sample = " .. (loss / tesize) .. 'ms')
-
+	print("\n==> loss per sample in pitch= " .. (loss[1] / tesize))
+	print("==> loss per sample in yaw= " .. (loss[2] / tesize))
+	
 	-- timing
 	time = sys.clock() - time
 	time = time / tesize

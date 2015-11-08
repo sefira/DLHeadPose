@@ -41,6 +41,8 @@ function train()
 
 	-- do one epoch
 	current_loss = 0
+	print('\n\n#######################################################')
+	print('#######################################################')
 	print('==> doing epoch on training data:')
 	print("==> online epoch # " .. epoch .. ' [batchSize = ' .. batchSize .. ']')
 	for t = 1,trsize,batchSize do
@@ -106,10 +108,7 @@ function train()
 	-- time taken
 	time = sys.clock() - time
 	time = time / trsize
-	print("\n==> time to learn 1 sample = " .. (time*1000) .. 'ms')
-
-	-- update logger/plot
-	trainLogger:add{['% mean class accuracy (train set)'] = confusion.totalValid * 100}
+	print("==> time to learn 1 sample = " .. (time*1000) .. 'ms')
 
 	-- save/log current net
 	local filename = paths.concat('results', 'model.net')

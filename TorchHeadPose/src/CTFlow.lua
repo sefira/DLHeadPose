@@ -10,10 +10,15 @@ dofile 'loss.lua'
 dofile 'train.lua'
 dofile 'test.lua'
 
-while true do
+for i = 1, 300 do
+--while true do
 	train()
-	--testInTrainData()
+	testInTrainData()
 	testInTestData()
+	if (i % 50 == 0) then
+		print("write the model weight to txt for C++ loader")
+		dofile 'writeModel.lua'
+	end 
 end
 
 function equal(a,b)
