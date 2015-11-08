@@ -4,7 +4,7 @@
 
 require 'torch'
 require 'nn'
-require 'cunn'
+--require 'cunn'
 
 ----------------------------------------------------------------------
 
@@ -14,13 +14,13 @@ model = nn.Sequential()
 -- stage 1
 model:add(nn.SpatialConvolution(1, 6, 5, 5))
 model:add(nn.Tanh())
-model:add(nn.SpatialMaxPooling(2,2,2,2))
+model:add(nn.SpatialAveragePooling(2,2,2,2))
 model:add(nn.Tanh())
 
 -- stage 2 
 model:add(nn.SpatialConvolution(6, 16, 5, 5))
 model:add(nn.Tanh())
-model:add(nn.SpatialMaxPooling(2,2,2,2))
+model:add(nn.SpatialAveragePooling(2,2,2,2))
 model:add(nn.Tanh())
 
 -- stage 3 
@@ -31,7 +31,7 @@ model:add(nn.Linear(120, 2))
 -- model:add(nn.Tanh())
  
 -- and move it to the GPU:
-model:cuda()
+--model:cuda()
 
 ----------------------------------------------------------------------
 print '==> here is the model:'

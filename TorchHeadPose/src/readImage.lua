@@ -51,8 +51,8 @@ for i = 1, #train_txt do
 	local train_image = imageread:mul(2):mul(1/255):add(-1)
 	
 	local train_data_temp = {
-		data = train_image:float(),
-		labels = train_labels:float()
+		data = train_image:double(),
+		labels = train_labels:double()
 		--data = train_image:cuda(),
 		--labels = train_labels:cuda()
 	}
@@ -81,8 +81,8 @@ for i = 1, #test_txt do
 	local test_image = imageread:mul(2):mul(1/255):add(-1)
 	
 	local test_data_temp = {
-		data = test_image:float(),
-		labels = test_labels:float()
+		data = test_image:double(),
+		labels = test_labels:double()
 		--data = test_image:cuda(),
 		--labels = test_labels:cuda()
 	}
