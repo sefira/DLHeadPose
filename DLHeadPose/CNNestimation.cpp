@@ -11,6 +11,30 @@ using namespace tiny_cnn::activation;
 using namespace std;
 
 cv::VideoCapture m_videocapture;
+static const std::string weights_filename = "xbu-weights";
+network<mse, adagrad> nn; 
+
+int ColouringWeightBias()
+{
+	for (int i = 0; i < nn.depth(); i++)
+	{
+		vec_t& weight = nn[i]->weight();
+		vec_t& bias = nn[i]->bias();
+
+		for (int j = 0; j < weight.size(); j++)
+		{
+			weight[j] = i * 2;
+		}
+		for (int j = 0; j < bias.size(); j++)
+		{
+			bias[j] = i * 2 + 1;
+		}
+	}
+	ofstream ofs("Colouring-weights");
+	ofs << nn;
+
+	return 0;
+}
 
 // convert tiny_cnn::image to cv::Mat and resize
 cv::Mat Image2Mat(image<>& img) {
@@ -31,9 +55,9 @@ int ResizeImage(cv::Mat img, double minv, double maxv,
 	{
 		for (int j = 0; j < resized.size().height; j++)
 		{
-			//TODO the "255 - " just needed in lecun-weights
 			double temp = (resized[i][j]) * (maxv - minv) / 255.0 + minv;
 			data.push_back(temp);
+			//cout << temp << endl;
 		}
 	}
 
@@ -72,66 +96,59 @@ int GetImageDataFromPicture(const std::string &picutrefilename, vec_t& data)
 }
 
 int Recognize(const std::string& dictionary) {
-	network<mse, adagrad> nn; // specify loss-function and learning strategy
 	nn << convolutional_layer<tan_h>(32, 32, 5, 1, 6)
 		<< average_pooling_layer<tan_h>(28, 28, 6, 2)
 		<< convolutional_layer<tan_h>(14, 14, 5, 6, 16)
 		<< average_pooling_layer<tan_h>(10, 10, 16, 2)
 		<< convolutional_layer<tan_h>(5, 5, 5, 16, 120)
-		//TODO output should be 2
-		//which is yaw and pitch
+		//2 output which are pitch and yaw
 		<< fully_connected_layer<tiny_cnn::activation::identity>(120, 2);
 
 	// load nets
-	ifstream ifs(dictionary.c_str());
+	ifstream ifs(weights_filename);
 	ifs >> nn;
 
-	vec_t data;
-	///////////////for video/////////////////////////////
+	//////////////////////////////////////////////////////
+	///////////////for video//////////////////////////////
+	//////////////////////////////////////////////////////
 #ifdef FOR_VIDEO
+	vec_t data;
 	m_videocapture = cv::VideoCapture(0);
 	while (1)
 	{
 		vec_t().swap(data);
 		GetImageDataFromVideo(data);
-		
+
 		// recognize
-		auto res = nn.predict(data);
-		vector<pair<double, int> > scores;
-
-		// sort & print top-3
-		for (int i = 0; i < res.size(); i++)
-			scores.emplace_back(res[i], i);
-
-		sort(scores.begin(), scores.end(), greater<pair<double, int>>());
-
-		cout << scores[0].second << "," << scores[0].first << endl;
+		vec_t result = nn.predict(data);
+		cout << result[0] << ' ' << result[1] << endl;
 	}
 #endif
-
+	////////////////////////////////////////////////////////
 	///////////////for picture//////////////////////////////
+	////////////////////////////////////////////////////////
 #ifndef FOR_VIDEO
-	GetImageDataFromPicture("1_1.jpg", data);
-	// recognize
-	auto res = nn.predict(data);
-	vector<pair<double, int> > scores;
 
-	// sort & print top-3
-	for (int i = 0; i < res.size(); i++)
-		scores.emplace_back(res[i], i);
+	vec_t test[4];
+	GetImageDataFromPicture("down_down\\image0\\1_1.jpg",test[0]);
+	GetImageDataFromPicture("down_up\\image-30\\1_1.jpg",test[1]);
+	GetImageDataFromPicture("up_down\\image45\\1_1.jpg",test[2]);
+	GetImageDataFromPicture("up_up\\image60\\1_1.jpg", test[3]);
 
-	sort(scores.begin(), scores.end(), greater<pair<double, int>>());
+	vec_t result[4];
 
-	for (int i = 0; i < scores.size() / 2; i++)
+	for (int i = 0; i < 4; i++)
 	{
-		cout << scores[i].second << "," << scores[i].first << endl;
+		result[i] = nn.predict(test[i]);
+		cout << result[i][0] << ' ' << result[i][1] << endl;
 	}
-
-	////////////////////visualize//////////////////////////////////
+	////////////////////////////////////////////////////////
+	////////////////visualize///////////////////////////////
+	////////////////////////////////////////////////////////
 #ifdef VISUALIZE
 	// visualize outputs of each layer
 	for (size_t i = 0; i < nn.depth(); i++) {
-		auto out_img = nn[i]->output_to_image(); 
+		auto out_img = nn[i]->output_to_image();
 		cv::imshow("layer:" + std::to_string(i), Image2Mat(out_img));
 	}
 	// visualize filter shape of first convolutional layer
