@@ -6,6 +6,8 @@ require 'torch'   -- torch
 require 'image'   -- for color transforms
 require 'nn'      -- provides a normalization operator
 require 'gnuplot' -- display a image
+require 'cunn'
+require 'cutorch'
 --gmagent = require 'graphicsmagick'
 
 ----------------------------------------------------------------------
@@ -51,10 +53,10 @@ for i = 1, #train_txt do
 	local train_image = imageread:mul(2):mul(1/255):add(-1)
 	
 	local train_data_temp = {
-		data = train_image:double(),
-		labels = train_labels:double()
-		--data = train_image:cuda(),
-		--labels = train_labels:cuda()
+		--data = train_image:double(),
+		--labels = train_labels:double()
+		data = train_image:cuda(),
+		labels = train_labels:cuda()
 	}
 	train_data[#train_data + 1] = train_data_temp
 	if(i % 100 == 0) then
@@ -81,10 +83,10 @@ for i = 1, #test_txt do
 	local test_image = imageread:mul(2):mul(1/255):add(-1)
 	
 	local test_data_temp = {
-		data = test_image:double(),
-		labels = test_labels:double()
-		--data = test_image:cuda(),
-		--labels = test_labels:cuda()
+		--data = test_image:double(),
+		--labels = test_labels:double()
+		data = test_image:cuda(),
+		labels = test_labels:cuda()
 	}
 	test_data[#test_data + 1] = test_data_temp
 	if(i % 100 == 0) then

@@ -31,7 +31,7 @@ model:add(nn.Linear(120, 2))
 -- model:add(nn.Tanh())
  
 -- and move it to the GPU:
---model:cuda()
+model:cuda()
 
 ----------------------------------------------------------------------
 print '==> here is the model:'

@@ -10,7 +10,7 @@ require 'nn'      -- provides all sorts of loss functions
 criterion = nn.MSECriterion()
 criterion.sizeAverage = false
 
---criterion:cuda()
+criterion:cuda()
 
 -- Compared to the other losses, the MSE criterion needs a distribution
 -- as a target, instead of an index. Indeed, it is a regression loss!

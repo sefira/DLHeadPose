@@ -11,7 +11,7 @@ using namespace tiny_cnn::activation;
 using namespace std;
 
 cv::VideoCapture m_videocapture;
-static const std::string weights_filename = "xbu-weights";
+static const std::string weights_filename = "xbu-weights_282";
 network<mse, adagrad> nn; 
 
 int ColouringWeightBias()

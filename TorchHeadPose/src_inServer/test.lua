@@ -1,3 +1,7 @@
+--------------------------------
+--TODO transforms tensor to cuda
+--------------------------------
+
 require 'torch'   -- torch
 require 'xlua'    -- xlua provides useful tools, like progress bars
 require 'optim'   -- an optimization package, for online and batch methods
@@ -13,7 +17,7 @@ function testInTrainData()
 	-- set model to evaluate mode (for modules that differ in training and testing, like Dropout)
 	model:evaluate()
 	local loss = torch.Tensor(2):fill(0)
-	
+	loss = loss:cuda()
 	-- test over test data
 	print('\n==> testing on train set:')
 	for t = 1,trsize do
@@ -45,7 +49,7 @@ function testInTestData()
 	-- set model to evaluate mode (for modules that differ in training and testing, like Dropout)
 	model:evaluate()
 	local loss = torch.Tensor(2):fill(0)
-
+	loss = loss:cuda()
 	-- test over test data
 	print('\n==> testing on test set:')
 	for t = 1,tesize do
