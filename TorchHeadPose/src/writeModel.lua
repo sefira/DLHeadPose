@@ -1,7 +1,20 @@
 ----------------------------------------
 -------------pure Lua-------------------
 ----------------------------------------
-file = io.open("xbu-weights", "w")
+function writeModel(epoch)
+	-- open or create a file then return the handle
+	file = io.open("xbu-weights_" .. epoch, "w")
+
+	writeCNN(1)
+	writePooling(6)
+	writeCNN(5)
+	writePooling(16)
+	writeCNN(9)
+	writeLinear(12)
+
+	-- colse the handle
+	file:close()
+end
 
 -- write CNN weight and bias
 function writeCNN(layer_num) 
@@ -77,13 +90,3 @@ function writeLinear(layer_num)
 	print("in ".."linear "..layer_num.." write "..count.." biases")
 	file:write(bias_str)
 end
-
-writeCNN(1)
-writePooling(6)
-writeCNN(5)
-writePooling(16)
-writeCNN(9)
-writeLinear(12)
-
--- colse the handle
-file:close()
