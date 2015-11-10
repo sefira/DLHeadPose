@@ -25,14 +25,15 @@ function writeCNN(layer_num)
 		for l = 1, (#weights)[2] do
 			for j = 1, (#weights)[3] do
 				for k = 1, (#weights)[4] do
+					weight_str = ''
 					count = count + 1
-					weight_str = weight_str .. weights[i][l][j][k] .. ' '
+					weight_str = weights[i][l][j][k] .. ' '
+					file:write(weight_str)
 				end
 			end
 		end
 	end
 	print("in ".."cnn "..layer_num.." write "..count.." weights")
-	file:write(weight_str)
 	
 	local count = 0
 	local biases = model:get(layer_num).bias	
