@@ -11,7 +11,7 @@ using namespace tiny_cnn::activation;
 using namespace std;
 
 cv::VideoCapture m_videocapture;
-static const std::string weights_filename = "xbu-weights_282";
+static const std::string weights_filename = "xbu-weights_50";
 network<mse, adagrad> nn; 
 
 int ColouringWeightBias()
@@ -53,7 +53,7 @@ int ResizeImage(cv::Mat img, double minv, double maxv,
 	cv::resize(img, resized, cv::Size(w, h));
 	for (int i = 0; i < resized.size().width; i++)
 	{
-		for (int j = 0; j < resized.size().height; j++)
+		for (int j = 0; j < resized.size().height; j++) 
 		{
 			double temp = (resized[i][j]) * (maxv - minv) / 255.0 + minv;
 			data.push_back(temp);
