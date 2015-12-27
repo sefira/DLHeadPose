@@ -1,0 +1,31 @@
+dofile "readImage.lua"
+
+model = nn.Sequential()
+model:add(nn.SpatialConvolution(1, 6, 5, 5))
+model:add(nn.Tanh())
+model:add(nn.SpatialAveragePooling(2,2,2,2))
+model:add(nn.Tanh())
+model:add(nn.SpatialConvolution(6, 16, 5, 5))
+model:add(nn.Tanh())
+model:add(nn.SpatialAveragePooling(2,2,2,2))
+model:add(nn.Tanh())
+model:add(nn.SpatialConvolution(16, 120, 5, 5))
+model:add(nn.Tanh())
+model:add(nn.Reshape(120))
+model:add(nn.Linear(120, 2))
+
+dofile "writeModel.lua"
+biases = model:get(12).bias
+weights = model:get(12).weight
+train_data[1].data
+model:forward(train_data[1].data)[1]
+model:forward(torch.Tensor(1,32,32):fill(-1))
+model:forward(test_data[1].data)
+model:forward(test_data[2].data)
+model:forward(test_data[3].data)
+model:forward(test_data[4].data)
+
+a = torch.conv2(torch.Tensor(32,32):fill(1),weights[1][1])
+a = torch.conv2(train_data[1].data[1],weights[1][1])
+
+

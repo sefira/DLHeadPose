@@ -11,7 +11,7 @@ using namespace tiny_cnn::activation;
 using namespace std;
 
 cv::VideoCapture m_videocapture;
-static const std::string weights_filename = "xbu-weights_50";
+static const std::string weights_filename = "xbu-weights_71";
 network<mse, adagrad> nn; 
 
 int ColouringWeightBias()
@@ -128,20 +128,38 @@ int Recognize(const std::string& dictionary) {
 	///////////////for picture//////////////////////////////
 	////////////////////////////////////////////////////////
 #ifndef FOR_VIDEO
+#define TESTNUM 1000
+	vec_t test[TESTNUM];
+	//GetImageDataFromPicture("down_down\\image0\\1_1.jpg",test[0]);
+	//GetImageDataFromPicture("down_up\\image-30\\1_1.jpg",test[1]);
+	//GetImageDataFromPicture("up_down\\image45\\1_1.jpg",test[2]);
+	//GetImageDataFromPicture("up_up\\image60\\1_1.jpg", test[3]);
 
-	vec_t test[4];
-	GetImageDataFromPicture("down_down\\image0\\1_1.jpg",test[0]);
-	GetImageDataFromPicture("down_up\\image-30\\1_1.jpg",test[1]);
-	GetImageDataFromPicture("up_down\\image45\\1_1.jpg",test[2]);
-	GetImageDataFromPicture("up_up\\image60\\1_1.jpg", test[3]);
+	std::string filenames[TESTNUM];
+	for (int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < 100; j++)
+		{
+			filenames[i * 100 + j] = "more_test2\\";
+			filenames[i * 100 + j] += std::to_string(i + 1);
+			filenames[i * 100 + j] += "_"; 
+			filenames[i * 100 + j] += std::to_string(j + 1);
+			filenames[i * 100 + j] += ".jpg";
+			GetImageDataFromPicture(filenames[i * 100 + j], test[i * 100 + j]);
+		}
+	}
 
-	vec_t result[4];
-
-	for (int i = 0; i < 4; i++)
+	vec_t result[TESTNUM];
+	double pitch = 0;
+	double yaw = 0;
+	for (int i = 0; i < TESTNUM; i++)
 	{
 		result[i] = nn.predict(test[i]);
-		cout << result[i][0] << ' ' << result[i][1] << endl;
+		cout << filenames[i] << ": " << result[i][0] << ' ' << result[i][1] << endl;
+		pitch += result[i][0];
+		yaw += result[i][1];
 	}
+	cout << "pitch:" << pitch / TESTNUM << "  yaw:" << yaw / TESTNUM << endl;
 	////////////////////////////////////////////////////////
 	////////////////visualize///////////////////////////////
 	////////////////////////////////////////////////////////
