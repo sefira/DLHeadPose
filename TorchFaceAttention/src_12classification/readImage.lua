@@ -43,8 +43,11 @@ for i = 1, #train_txt do
 		res[#res + 1] = v
 	end
 	filename = res[1]
-	train_labels[res[2] + 1] = 1 -- class
-	--train_labels = res[2] + 1
+	if ClassNULL then
+		train_labels[res[2] + 1] = 1
+	else
+		train_labels[res[2] + 1] = 1 -- class
+	end
 	-- here need to mul(255) due to torch will auto mul(1/255) for a jpg
 	local imageread = image.load("../data/" .. filename):mul(255)
 	--print(imageread:max())
@@ -73,8 +76,11 @@ for i = 1, #test_txt do
 		res[#res + 1] = v
 	end
 	filename = res[1]
-	test_labels[res[2] + 1] = 1 -- class
-	--test_labels = res[2] + 1
+	if ClassNULL then
+		test_labels[res[2] + 1] = 1
+	else
+		test_labels[res[2] + 1] = 1 -- class
+	end
 	-- here need to mul(255) due to torch will auto mul(1/255) for a jpg
 	local imageread = image.load("../data/" .. filename):mul(255)
 	--print(imageread:max())

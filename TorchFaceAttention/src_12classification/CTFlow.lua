@@ -7,8 +7,10 @@ print '==> executing all'
 -------------------configuration------------------
 liveplot = false
 enableCuda = true
+ClassNULL = true
 
 if enableCuda then
+	print "CUDA enable"
 	require 'cunn'
 	require 'cutorch'
 end
@@ -28,18 +30,21 @@ classes = {'1','2'}
 confusion = optim.ConfusionMatrix(classes)
 current_confusion_totalValid = 0
 old_loss = 1000
+current_loss = 0
 epoch = 1
 for i = 1, 1000 do
 --while true do
 	train()
-	testInTrainData()
-	testInTestData()
 	if (i % 100 == 0) then
+		--testInTrainData()
+		testInTestData()
 		print("write the model weight to txt for C++ loader")
 		writeModel(i)
 	end
+
 	--if (current_confusion_totalValid > 95) then  -- current_confusion_totalValid > 95%
-	if (torch.abs(old_loss - current_loss) < 0.0001) then 
+	if (current_loss < 0.01) and (torch.abs(old_loss - current_loss) < 0.0001) and (current_confusion_totalValid > 95) then 
+		testInTestData()
 		print("############## final write ######################")
 		print("write the model weight to txt for C++ loader")
 		writeModel(i)

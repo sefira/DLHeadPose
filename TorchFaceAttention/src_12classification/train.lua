@@ -65,7 +65,6 @@ function train()
 			table.insert(inputs, input)
 			table.insert(targets, target)
 		end
-
 		-- create closure to evaluate f(X) and df/dX
 		local feval = function(x)
 						-- get new parameters
@@ -84,8 +83,11 @@ function train()
 							-- estimate f
 							local output = model:forward(inputs[i])
 							local err = criterion:forward(output, targets[i])
-							f = f + err
-
+							if (targets[i] == 1) then
+								f = f + (err * 5)
+							else
+								f = f + err
+							end
 							-- estimate df/dW
 							local df_do = criterion:backward(output, targets[i])
 							model:backward(inputs[i], df_do)
