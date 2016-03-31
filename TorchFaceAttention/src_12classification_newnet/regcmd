@@ -1,3 +1,7 @@
+liveplot = false
+enableCuda = false
+ClassNLL = true
+
 dofile "readImage.lua"
 
 model = nn.Sequential()

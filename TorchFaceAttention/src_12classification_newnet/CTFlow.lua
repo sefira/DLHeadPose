@@ -6,8 +6,8 @@ print '==> executing all'
 
 -------------------configuration------------------
 liveplot = false
-enableCuda = true
-ClassNULL = true
+enableCuda = false
+ClassNLL = true
 
 if enableCuda then
 	print "CUDA enable"
@@ -31,23 +31,33 @@ confusion = optim.ConfusionMatrix(classes)
 current_confusion_totalValid = 0
 old_loss = 1000
 current_loss = 0
+-- target to optimization
+loss_target = 0.01
+loss_difference_target = 0.0001
+confusion_totalValid_target = 95
+
+-- optimization
 epoch = 1
 for i = 1, 1000 do
 --while true do
 	train()
+	print(old_loss)
+	print(current_loss)
+	print(current_confusion_totalValid)
+	print(torch.abs(old_loss - current_loss))
 	if (i % 100 == 0) then
 		--testInTrainData()
 		testInTestData()
 		print("write the model weight to txt for C++ loader")
-		writeModel(i)
+		--writeModel(i)
 	end
 
-	--if (current_confusion_totalValid > 95) then  -- current_confusion_totalValid > 95%
-	if (current_loss < 0.01) and (torch.abs(old_loss - current_loss) < 0.0001) and (current_confusion_totalValid > 95) then 
+	--if (current_loss < loss_target) and (torch.abs(old_loss - current_loss) < loss_difference_target) and (current_confusion_totalValid > 95) then 
+	if (torch.abs(old_loss - current_loss) < loss_difference_target) and (current_confusion_totalValid > current_confusion_totalValid_target) then 
 		testInTestData()
 		print("############## final write ######################")
 		print("write the model weight to txt for C++ loader")
-		writeModel(i)
+		--writeModel(i)
 		break
 	end
 	old_loss = current_loss
