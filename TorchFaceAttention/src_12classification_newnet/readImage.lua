@@ -57,7 +57,7 @@ for i = 1, #train_txt do
 	-- here need to mul(255) due to torch will auto mul(1/255) for a jpg
 	local imageread = image.load("../data/" .. filename):mul(255)
 	--print(imageread:max())
-	local train_image = imageread:mul(2):mul(1/255):add(-1)
+	local train_image = imageread
 	local train_data_temp
 	if enableCuda then
 		train_data_temp = {
@@ -101,7 +101,7 @@ for i = 1, #test_txt do
 	-- here need to mul(255) due to torch will auto mul(1/255) for a jpg
 	local imageread = image.load("../data/" .. filename):mul(255)
 	--print(imageread:max())
-	local test_image = imageread:mul(2):mul(1/255):add(-1)
+	local test_image = imageread
 	local test_data_temp
 	if enableCuda then
 		test_data_temp = {

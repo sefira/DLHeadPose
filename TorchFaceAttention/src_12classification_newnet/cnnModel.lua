@@ -6,28 +6,47 @@ require 'torch'
 require 'nn'
 
 ----------------------------------------------------------------------
+classicalModel = false
 
 -- define model to train
 model = nn.Sequential()
 
--- stage 1
-model:add(nn.SpatialConvolution(1, 6, 5, 5))
-model:add(nn.Tanh())
-model:add(nn.SpatialAveragePooling(2,2,2,2))
-model:add(nn.Tanh())
+if classicalModel then
+	-- stage 1
+	model:add(nn.SpatialConvolution(1, 6, 5, 5))
+	model:add(nn.ReLU())
+	model:add(nn.SpatialAveragePooling(2,2,2,2))
 
--- stage 2 
-model:add(nn.SpatialConvolution(6, 16, 5, 5))
-model:add(nn.Tanh())
-model:add(nn.SpatialAveragePooling(2,2,2,2))
-model:add(nn.Tanh())
+	-- stage 2 
+	model:add(nn.SpatialConvolution(6, 16, 5, 5))
+	model:add(nn.ReLU())
+	model:add(nn.SpatialAveragePooling(2,2,2,2))
 
--- stage 3 
-model:add(nn.SpatialConvolution(16, 120, 5, 5))
-model:add(nn.Tanh())
-model:add(nn.Reshape(120))
-model:add(nn.Linear(120, 2))
--- model:add(nn.Tanh())
+	-- stage 3 
+	model:add(nn.SpatialConvolution(16, 120, 5, 5))
+	model:add(nn.ReLU())
+	model:add(nn.Reshape(120))
+	model:add(nn.Linear(120, 2))
+else
+	-- stage 1
+	model:add(nn.SpatialConvolution(1, 16, 5, 5))
+	model:add(nn.ReLU())
+	model:add(nn.SpatialMaxPooling(2,2,2,2))
+
+	-- stage 2 
+	model:add(nn.SpatialConvolution(16, 32, 3, 3))
+	model:add(nn.ReLU())
+	model:add(nn.SpatialMaxPooling(2,2,2,2))
+
+	-- stage 3 
+	model:add(nn.SpatialConvolution(32, 64, 3, 3))
+	model:add(nn.ReLU())
+	model:add(nn.SpatialConvolution(64, 128, 3, 3))
+	model:add(nn.ReLU())
+	model:add(nn.SpatialMaxPooling(2,2,2,2))
+	model:add(nn.Reshape(128))
+	model:add(nn.Linear(128, 2))
+end
 
 ----------------------------------------------------------------------
 print '==> here is the model:'

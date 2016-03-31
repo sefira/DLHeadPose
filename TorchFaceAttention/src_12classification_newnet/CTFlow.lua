@@ -1,3 +1,6 @@
+--------------------------------
+--TODO transforms tensor to cuda
+--------------------------------
 require 'torch'
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
@@ -53,7 +56,7 @@ for i = 1, 1000 do
 	end
 
 	--if (current_loss < loss_target) and (torch.abs(old_loss - current_loss) < loss_difference_target) and (current_confusion_totalValid > 95) then 
-	if (torch.abs(old_loss - current_loss) < loss_difference_target) and (current_confusion_totalValid > current_confusion_totalValid_target) then 
+	if (torch.abs(old_loss - current_loss) < loss_difference_target) and (current_confusion_totalValid > confusion_totalValid_target) then 
 		testInTestData()
 		print("############## final write ######################")
 		print("write the model weight to txt for C++ loader")
