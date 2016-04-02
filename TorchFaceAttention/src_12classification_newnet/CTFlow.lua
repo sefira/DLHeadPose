@@ -9,7 +9,7 @@ print '==> executing all'
 
 -------------------configuration------------------
 liveplot = false
-enableCuda = false
+enableCuda = true 
 ClassNLL = true
 
 if enableCuda then
