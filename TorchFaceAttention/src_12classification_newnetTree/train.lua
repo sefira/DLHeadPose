@@ -83,11 +83,7 @@ function train()
 							-- estimate f
 							local output = model:forward(inputs[i])
 							local err = criterion:forward(output, targets[i])
-							if (targets[i] == 1) then
-								f = f + (err * 5)
-							else
-								f = f + err
-							end
+							f = f + err
 							-- estimate df/dW
 							local df_do = criterion:backward(output, targets[i])
 							model:backward(inputs[i], df_do)

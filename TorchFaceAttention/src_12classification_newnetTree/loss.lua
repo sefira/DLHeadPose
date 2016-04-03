@@ -6,7 +6,6 @@ require 'torch'   -- torch
 require 'nn'      -- provides all sorts of loss functions
 
 ----------------------------------------------------------------------
-model:add(nn.LogSoftMax())
 if ClassNLL then
 	criterion = nn.ClassNLLCriterion()
 else 
@@ -15,6 +14,5 @@ end
 
 -- and move it to the GPU:
 if enableCuda then
-	model:cuda()
 	criterion:cuda()
 end

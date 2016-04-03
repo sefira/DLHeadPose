@@ -18,6 +18,7 @@ function file_exists(file)
 	end
 	return f ~= nil
 end
+
 function read_file (file)
 	if not file_exists(file) then 
 		return {} 

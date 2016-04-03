@@ -12,7 +12,7 @@ liveplot = false
 enableCuda = true 
 ClassNLL = true
 treeModel = true
-loadModel = true
+loadModel = false
 
 if enableCuda then
 	print "CUDA enable"
