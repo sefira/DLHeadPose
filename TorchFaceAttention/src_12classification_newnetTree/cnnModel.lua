@@ -92,7 +92,7 @@ if (not loadModel) then
 end
 
 model = {nn.Sequential(),nn.Sequential(),nn.Sequential(),nn.Sequential()}
-function modelGeneraterImplements(branchNum)
+function modelGenerater(branchNum)
 	model[branchNum].add(modelNode[1][math.ceil(branchNum/4)])
 	model[branchNum].add(modelNode[2][math.ceil(branchNum/2)])
 	model[branchNum].add(modelNode[3][math.ceil(branchNum/1)])
@@ -104,9 +104,32 @@ function modelGeneraterImplements(branchNum)
 end
 
 for i = 1,4 do 
-	modelGeneraterImplements(i)
+	modelGenerater(i)
 end
 
 ----------------------------------------------------------------------
 print '==> here is the model:'
 print(model)
+
+function TreeModelForward(input)
+	firstLayerOutput = modelNode[1][1]:forward(input)
+	decisionOutput = decisionTreeNode[1][1]:forward(firstLayerOutput)
+	if (decisionOutput[1] >= 0) then
+		route = 1
+		print(route)
+	else
+		route = 2
+		print(route)
+	end
+	secondLayerOutput = modelNode[2][route]:forward(firstLayerOutput)
+	decisionOutput = decisionTreeNode[2][route]:forward(secondLayerOutput)
+	if (decisionOutput[1] >= 0) then
+		route = (route * 2 - 1)
+		print(route)
+	else
+		route = (route * 2)
+		print(route)
+	end
+	thirdLayerOutput = modelNode[3][route]:forward(secondLayerOutput)
+	return thirdLayerOutput
+end
