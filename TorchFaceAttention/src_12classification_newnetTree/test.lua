@@ -10,9 +10,10 @@ function testInTrainData()
 	-- local vars
 	local time = sys.clock()
 
-	-- set model to evaluate mode (for modules that differ in training and testing, like Dropout)
-	model:evaluate()
-	
+	-- set TreeModels to evaluate mode (for modules that differ in training and testing, like Dropout)	
+	for i = 1,4 do 
+		TreeModels[i]:evaluate()
+	end
 	-- test over test data
 	print('\n==> testing on train set:')
 	for t = 1,trsize do
@@ -24,7 +25,7 @@ function testInTrainData()
 		local target = train_data[t].labels
 
 		-- test sample
-		local pred = model:forward(input)
+		local pred = TreeModelForward(input)
       	confusion:add(pred, target)
 	end
 
@@ -51,8 +52,10 @@ function testInTestData()
 	-- local vars
 	local time = sys.clock()
 
-	-- set model to evaluate mode (for modules that differ in training and testing, like Dropout)
-	model:evaluate()
+	-- set TreeModels to evaluate mode (for modules that differ in training and testing, like Dropout)
+	for i = 1,4 do 
+		TreeModels[i]:evaluate()
+	end
 
 	-- test over test data
 	print('\n==> testing on test set:')
@@ -65,7 +68,7 @@ function testInTestData()
 		local target = test_data[t].labels
 
 		-- test sample
-		local pred = model:forward(input)
+		local pred = TreeModelForward(input)
       	confusion:add(pred, target)
 	end
 	

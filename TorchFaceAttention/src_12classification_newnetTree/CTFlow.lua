@@ -10,9 +10,9 @@ print '==> executing all'
 -------------------configuration------------------
 liveplot = false
 enableCuda = true 
-ClassNLL = true
-treeModel = true
-loadModel = false
+ClassNLL = true -- use classNLL or KL
+loadModel = false -- load model node from saved nodefile
+inheritModel = true -- inherit model node from parent model that a CNN model trained without tree
 
 if enableCuda then
 	print "CUDA enable"
@@ -20,7 +20,7 @@ if enableCuda then
 	require 'cutorch'
 end
 -------------------configuration------------------
-
+dofile 'utils.lua'
 dofile 'readImage.lua'
 dofile 'cnnModel.lua'
 dofile 'loss.lua'
@@ -61,14 +61,4 @@ for i = 1, 1000 do
 		break
 	end
 	old_loss = current_loss
-end
-
-function equal(a,b)
-	res = torch.eq(a,b)
-	minV = torch.min(res)
-	if minV == 1 then
-		return "EQUAL"
-	else
-		return "NOT EQUAL"
-	end
 end

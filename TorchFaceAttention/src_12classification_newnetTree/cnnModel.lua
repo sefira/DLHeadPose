@@ -35,31 +35,62 @@ if (not loadModel) then
 	modelNode[2] = {nn.Sequential(),nn.Sequential()}
 	modelNode[3] = {nn.Sequential(),nn.Sequential(),nn.Sequential(),nn.Sequential()}
 
-	-- stage 1
-	modelNode[1][1]:add(nn.SpatialConvolution(1, 16, 5, 5))
-	modelNode[1][1]:add(nn.ReLU())
-	modelNode[1][1]:add(nn.SpatialMaxPooling(2,2,2,2))
+	if (inheritModel) then
+		print("inherit model node from parent model that a CNN model trained without tree")
+		parentModel = torch.load("results/model.net")
 
-	-- stage 2 
-	modelNode[2][1]:add(nn.SpatialConvolution(16, 32, 3, 3))
-	modelNode[2][1]:add(nn.ReLU())
-	modelNode[2][1]:add(nn.SpatialMaxPooling(2,2,2,2))
+		-- stage 1
+		modelNode[1][1]:add(parentModel:get(1)) -- nn.SpatialConvolution(1, 16, 5, 5)
+		modelNode[1][1]:add(parentModel:get(2)) -- nn.ReLU()
+		modelNode[1][1]:add(parentModel:get(3)) -- nn.SpatialMaxPooling(2,2,2,2)
 
-	modelNode[2][2] = modelNode[2][1]:clone()
+		-- stage 2
+		modelNode[2][1]:add(parentModel:get(4)) -- nn.SpatialConvolution(16, 32, 3, 3)
+		modelNode[2][1]:add(parentModel:get(5)) -- nn.ReLU()
+		modelNode[2][1]:add(parentModel:get(6)) -- nn.SpatialMaxPooling(2,2,2,2)
 
-	-- stage 3
-	modelNode[3][1]:add(nn.SpatialConvolution(32, 64, 3, 3))
-	modelNode[3][1]:add(nn.ReLU())
-	modelNode[3][1]:add(nn.SpatialConvolution(64, 128, 3, 3))
-	modelNode[3][1]:add(nn.ReLU())
-	modelNode[3][1]:add(nn.SpatialMaxPooling(2,2,2,2))
-	modelNode[3][1]:add(nn.Reshape(128))
-	modelNode[3][1]:add(nn.Linear(128, 2))
-	modelNode[3][1]:add(nn.LogSoftMax())
+		modelNode[2][2] = modelNode[2][1]:clone()
 
-	modelNode[3][2] = modelNode[3][1]:clone()
-	modelNode[3][3] = modelNode[3][1]:clone()
-	modelNode[3][4] = modelNode[3][1]:clone()
+		-- stage 3
+		modelNode[3][1]:add(parentModel:get(7)) -- nn.SpatialConvolution(32, 64, 3, 3)
+		modelNode[3][1]:add(parentModel:get(8)) -- nn.ReLU()
+		modelNode[3][1]:add(parentModel:get(9)) -- nn.SpatialConvolution(64, 128, 3, 3)
+		modelNode[3][1]:add(parentModel:get(10)) -- nn.ReLU()
+		modelNode[3][1]:add(parentModel:get(11)) -- nn.SpatialMaxPooling(2,2,2,2)
+		modelNode[3][1]:add(parentModel:get(12)) -- nn.Reshape(128)
+		modelNode[3][1]:add(parentModel:get(13)) -- nn.Linear(128, 2)
+		modelNode[3][1]:add(parentModel:get(14)) -- nn.LogSoftMax()
+
+		modelNode[3][2] = modelNode[3][1]:clone()
+		modelNode[3][3] = modelNode[3][1]:clone()
+		modelNode[3][4] = modelNode[3][1]:clone()
+	else
+		-- stage 1
+		modelNode[1][1]:add(nn.SpatialConvolution(1, 16, 5, 5))
+		modelNode[1][1]:add(nn.ReLU())
+		modelNode[1][1]:add(nn.SpatialMaxPooling(2,2,2,2))
+
+		-- stage 2
+		modelNode[2][1]:add(nn.SpatialConvolution(16, 32, 3, 3))
+		modelNode[2][1]:add(nn.ReLU())
+		modelNode[2][1]:add(nn.SpatialMaxPooling(2,2,2,2))
+
+		modelNode[2][2] = modelNode[2][1]:clone()
+
+		-- stage 3
+		modelNode[3][1]:add(nn.SpatialConvolution(32, 64, 3, 3))
+		modelNode[3][1]:add(nn.ReLU())
+		modelNode[3][1]:add(nn.SpatialConvolution(64, 128, 3, 3))
+		modelNode[3][1]:add(nn.ReLU())
+		modelNode[3][1]:add(nn.SpatialMaxPooling(2,2,2,2))
+		modelNode[3][1]:add(nn.Reshape(128))
+		modelNode[3][1]:add(nn.Linear(128, 2))
+		modelNode[3][1]:add(nn.LogSoftMax())
+
+		modelNode[3][2] = modelNode[3][1]:clone()
+		modelNode[3][3] = modelNode[3][1]:clone()
+		modelNode[3][4] = modelNode[3][1]:clone()
+	end
 
 	-- Decision Tree Node
 	decisionTreeNode = {}
@@ -73,32 +104,30 @@ if (not loadModel) then
 	decisionTreeNode[2][1]:add(nn.Linear(6*6*32,1))
 
 	decisionTreeNode[2][2] = decisionTreeNode[2][1]:clone()
-
-
-	-- and move these to the GPU:
-	if enableCuda then
-		for i = 1,#modelNode do
-			for j = 1,#modelNode[i] do 
-				modelNode[i][j]:cuda()
-			end
-		end
-		for i = 1,#decisionTreeNode do
-			for j = 1,#decisionTreeNode[i] do
-				decisionTreeNode[i][j]:cuda()
-			end
-		end
-	end
-
 end
 
-model = {nn.Sequential(),nn.Sequential(),nn.Sequential(),nn.Sequential()}
+-- and move these to the GPU:
+if enableCuda then
+	for i = 1,#modelNode do
+		for j = 1,#modelNode[i] do 
+			modelNode[i][j]:cuda()
+		end
+	end
+	for i = 1,#decisionTreeNode do
+		for j = 1,#decisionTreeNode[i] do
+			decisionTreeNode[i][j]:cuda()
+		end
+	end
+end
+
+TreeModels = {nn.Sequential(),nn.Sequential(),nn.Sequential(),nn.Sequential()}
 function modelGenerater(branchNum)
-	model[branchNum].add(modelNode[1][math.ceil(branchNum/4)])
-	model[branchNum].add(modelNode[2][math.ceil(branchNum/2)])
-	model[branchNum].add(modelNode[3][math.ceil(branchNum/1)])
+	TreeModels[branchNum].add(modelNode[1][1])
+	TreeModels[branchNum].add(modelNode[2][math.ceil(branchNum/2)])
+	TreeModels[branchNum].add(modelNode[3][branchNum])
 
 	if enableCuda then
-		model[branchNum]:cuda()
+		TreeModels[branchNum]:cuda()
 	end
 
 end
@@ -109,27 +138,27 @@ end
 
 ----------------------------------------------------------------------
 print '==> here is the model:'
-print(model)
+print(TreeModels)
 
-function TreeModelForward(input)
-	firstLayerOutput = modelNode[1][1]:forward(input)
-	decisionOutput = decisionTreeNode[1][1]:forward(firstLayerOutput)
-	if (decisionOutput[1] >= 0) then
-		route = 1
-		print(route)
+function TreeModelForward(input,training)
+	local firstLayerOutput = modelNode[1][1]:forward(input)
+	local firstDecisionOutput = decisionTreeNode[1][1]:forward(firstLayerOutput)
+	if (firstDecisionOutput[1] >= 0) then
+		local firstRoute = 1
+		print(firstRoute)
 	else
-		route = 2
-		print(route)
+		local firstRoute = 2
+		print(firstRoute)
 	end
-	secondLayerOutput = modelNode[2][route]:forward(firstLayerOutput)
-	decisionOutput = decisionTreeNode[2][route]:forward(secondLayerOutput)
-	if (decisionOutput[1] >= 0) then
-		route = (route * 2 - 1)
-		print(route)
+	local secondLayerOutput = modelNode[2][firstRoute]:forward(firstLayerOutput)
+	local secondDecisionOutput = decisionTreeNode[2][firstRoute]:forward(secondLayerOutput)
+	if (secondDecisionOutput[1] >= 0) then
+		local secondRoute = (firstRoute * 2 - 1)
+		print(secondRoute)
 	else
-		route = (route * 2)
-		print(route)
+		local secondRoute = (firstRoute * 2)
+		print(secondRoute)
 	end
-	thirdLayerOutput = modelNode[3][route]:forward(secondLayerOutput)
-	return thirdLayerOutput
+	local thirdLayerOutput = modelNode[3][secondRoute]:forward(secondLayerOutput)
+	return thirdLayerOutput,firstDecisionOutput,secondDecisionOutput,firstRoute,secondRoute
 end

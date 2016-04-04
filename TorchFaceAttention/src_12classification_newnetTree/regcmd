@@ -2,60 +2,39 @@ liveplot = false
 enableCuda = false
 ClassNLL = true
 
-model = nn.Sequential()
--- stage 1
-model:add(nn.SpatialConvolution(1, 16, 5, 5))
-model:add(nn.ReLU())
-model:add(nn.SpatialMaxPooling(2,2,2,2))
--- stage 2 
-model:add(nn.SpatialConvolution(16, 32, 3, 3))
-model:add(nn.ReLU())
-model:add(nn.SpatialMaxPooling(2,2,2,2))
--- stage 3 
-model:add(nn.SpatialConvolution(32, 64, 3, 3))
-model:add(nn.ReLU())
-model:add(nn.SpatialConvolution(64, 128, 3, 3))
-model:add(nn.ReLU())
-model:add(nn.SpatialMaxPooling(2,2,2,2))
-model:add(nn.Reshape(128))
-model:add(nn.Linear(128, 2))
-
-
-biases = model:get(12).bias
-weights = model:get(12).weight
-train_data[1].data
-model:forward(train_data[1].data)[1]
-model:forward(torch.Tensor(1,32,32):fill(-1))
 model:forward(test_data[1].data)
 model:forward(test_data[2].data)
 model:forward(test_data[3].data)
 model:forward(test_data[4].data)
 
-a = torch.conv2(torch.Tensor(32,32):fill(1),weights[1][1])
-a = torch.conv2(train_data[1].data[1],weights[1][1])
-
-
 dofile "readImage.lua"
-shuffle = torch.randperm(trsize)
 i=1
 input = train_data[i].data
 target = train_data[i].labels
 output = model:forward(input)
-err = criterion:forward(output, target)
+--err = criterion:forward(output, target)
 target
 output
-err
-
-#(model:get(1).weight)
-
-exp(-1.3)+exp(-1.2)+exp(0.9)+exp(2.4)+exp(1.1)+exp(-0.1)+exp(-0.9)+exp(-0.9)+exp(0.9)+exp(-1.9)
--0.280555 0.15342
-
-log(exp(0.15342)/(exp(-0.280555)+exp(0.15342)))/log(e)
+--err
 
 require 'cunn'
 require 'cutorch'
 require 'torch'
 require 'nn'
 
-model = torch.load("results/model.net")
+--model = torch.load("results/model.net")
+TreeModels = {nn.Sequential(),nn.Sequential(),nn.Sequential(),nn.Sequential()}
+function modelGenerater(branchNum)
+    TreeModels[branchNum].add(modelNode[1][1])
+    TreeModels[branchNum].add(modelNode[2][math.ceil(branchNum/2)])
+    TreeModels[branchNum].add(modelNode[3][branchNum])
+
+    if enableCuda then
+        TreeModels[branchNum]:cuda()
+    end
+
+end
+
+for i = 1,4 do 
+    modelGenerater(i)
+end
