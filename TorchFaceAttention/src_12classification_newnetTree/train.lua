@@ -91,6 +91,10 @@ function train()
                         -- f is the average of all criterions, actually won't be used in sgd.lua
                         local f = 0
 
+                        local arrivedCount = {}
+                        for i=1,4 do
+                            arrivedCount[i] = 0
+                        end
                         -- evaluate function for complete mini batch
                         for i = 1,#inputs do
                             -- estimate f
@@ -99,11 +103,11 @@ function train()
                             f = f + err
                             arrivedCount[secondRoute] = arrivedCount[secondRoute] + 1
                             -- estimate df/dW
-                            local df_do = criterion:backward(output, targets[i])
+                            local df_do = criterion:backward(thirdLayerOutput, targets[i])
                             TreeModels[secondRoute]:backward(inputs[i], df_do)
 
                             -- update confusion
-                            confusion:add(output, targets[i])
+                            confusion:add(thirdLayerOutput, targets[i])
                         end
 
                         -- normalize gradients and f(X)

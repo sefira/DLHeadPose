@@ -21,20 +21,56 @@ require 'cunn'
 require 'cutorch'
 require 'torch'
 require 'nn'
+dofile 'utils.lua'
 
---model = torch.load("results/model.net")
-TreeModels = {nn.Sequential(),nn.Sequential(),nn.Sequential(),nn.Sequential()}
-function modelGenerater(branchNum)
-    TreeModels[branchNum].add(modelNode[1][1])
-    TreeModels[branchNum].add(modelNode[2][math.ceil(branchNum/2)])
-    TreeModels[branchNum].add(modelNode[3][branchNum])
+criterion = nn.MSECriterion()
+inputs = torch.ones(6)
+target = torch.ones(1)*10
+TreeModels = {nn.Sequential(),nn.Sequential()}
+TreeModels[1]:add(nn.Linear(6,1))
+TreeModels[2]:add(nn.Linear(6,1))
+parameters1,gradParameters1 = TreeModels[1]:getParameters()
+parameters2,gradParameters2 = TreeModels[2]:getParameters()
 
-    if enableCuda then
-        TreeModels[branchNum]:cuda()
-    end
+parameters = {}
+gradParameters = {}
+parameters = {parameters1,parameters2}
+gradParameters = {gradParameters1,gradParameters2,gradParameters3,gradParameters4}
+parametersList = flattenParameters(parameters)
+gradParametersList = flattenParameters(gradParameters)
+gradParametersList:zero()
 
-end
+gradParameters1:zero()
+output = TreeModels[1]:forward(inputs)
+err = criterion:forward(output, target)
+dfdx = criterion:backward(output, target)
+TreeModels[1]:backward(inputs, dfdx)
+parameters1,gradParameters1
+TreeModels[1]:getParameters()
 
-for i = 1,4 do 
-    modelGenerater(i)
-end
+
+require 'torch'
+require 'nn'
+dofile 'utils.lua'
+criterion = nn.MSECriterion()
+input = torch.ones(4)
+target = torch.ones(1) * 10
+model = {nn.Sequential(),nn.Sequential()}
+model[1]:add(nn.Linear(4, 1))
+model[2]:add(nn.Linear(4, 1))
+parameters = {}
+gradParameters = {}
+parameters[1],gradParameters[1] = model[1]:getParameters()
+parameters[2],gradParameters[2] = model[2]:getParameters()
+bla = gradParameters[1]:zero()
+parametersList = flattenParameters(parameters)
+gradParametersList = flattenParameters(gradParameters)
+bla = gradParametersList:zero()
+
+output = model[1]:forward(input)
+err = criterion:forward(output, target)
+df_do = criterion:backward(output, target)
+print("print(gradParametersList):")
+print(gradParameters[1])
+bla = model[1]:backward(input, df_do)
+print(gradParameters[1])

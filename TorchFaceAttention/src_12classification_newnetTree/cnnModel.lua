@@ -122,9 +122,9 @@ end
 
 TreeModels = {nn.Sequential(),nn.Sequential(),nn.Sequential(),nn.Sequential()}
 function modelGenerater(branchNum)
-    TreeModels[branchNum].add(modelNode[1][1])
-    TreeModels[branchNum].add(modelNode[2][math.ceil(branchNum/2)])
-    TreeModels[branchNum].add(modelNode[3][branchNum])
+    TreeModels[branchNum]:add(modelNode[1][1])
+    TreeModels[branchNum]:add(modelNode[2][math.ceil(branchNum/2)])
+    TreeModels[branchNum]:add(modelNode[3][branchNum])
 
     if enableCuda then
         TreeModels[branchNum]:cuda()
@@ -143,20 +143,22 @@ print(TreeModels)
 function TreeModelForward(input,training)
     local firstLayerOutput = modelNode[1][1]:forward(input)
     local firstDecisionOutput = decisionTreeNode[1][1]:forward(firstLayerOutput)
+    local firstRoute
     if (firstDecisionOutput[1] >= 0) then
-        local firstRoute = 1
+        firstRoute = 1
         print(firstRoute)
     else
-        local firstRoute = 2
+        firstRoute = 2
         print(firstRoute)
     end
     local secondLayerOutput = modelNode[2][firstRoute]:forward(firstLayerOutput)
     local secondDecisionOutput = decisionTreeNode[2][firstRoute]:forward(secondLayerOutput)
+    local secondRoute
     if (secondDecisionOutput[1] >= 0) then
-        local secondRoute = (firstRoute * 2 - 1)
+        secondRoute = (firstRoute * 2 - 1)
         print(secondRoute)
     else
-        local secondRoute = (firstRoute * 2)
+        secondRoute = (firstRoute * 2)
         print(secondRoute)
     end
     local thirdLayerOutput = modelNode[3][secondRoute]:forward(secondLayerOutput)
