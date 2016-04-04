@@ -15,9 +15,9 @@ loadModel = false -- load model node from saved nodefile
 inheritModel = true -- inherit model node from parent model that a CNN model trained without tree
 
 if enableCuda then
-	print "CUDA enable"
-	require 'cunn'
-	require 'cutorch'
+    print "CUDA enable"
+    require 'cunn'
+    require 'cutorch'
 end
 -------------------configuration------------------
 dofile 'utils.lua'
@@ -44,21 +44,21 @@ confusion_totalValid_target = 95
 epoch = 1
 for i = 1, 1000 do
 --while true do
-	train()
-	print(old_loss)
-	print(current_loss)
-	print(current_confusion_totalValid)
-	print(torch.abs(old_loss - current_loss))
-	if (i % 100 == 0) then
-		--testInTrainData()
-		testInTestData()
-	end
+    train()
+    print(old_loss)
+    print(current_loss)
+    print(current_confusion_totalValid)
+    print(torch.abs(old_loss - current_loss))
+    if (i % 100 == 0) then
+        --testInTrainData()
+        testInTestData()
+    end
 
-	--if (current_loss < loss_target) and (torch.abs(old_loss - current_loss) < loss_difference_target) and (current_confusion_totalValid > 95) then 
-	if (torch.abs(old_loss - current_loss) < loss_difference_target) and (current_confusion_totalValid > confusion_totalValid_target) then 
-		testInTestData()
-		print("############## final test ######################")
-		break
-	end
-	old_loss = current_loss
+    --if (current_loss < loss_target) and (torch.abs(old_loss - current_loss) < loss_difference_target) and (current_confusion_totalValid > 95) then 
+    if (torch.abs(old_loss - current_loss) < loss_difference_target) and (current_confusion_totalValid > confusion_totalValid_target) then 
+        testInTestData()
+        print("############## final test ######################")
+        break
+    end
+    old_loss = current_loss
 end
