@@ -146,20 +146,24 @@ function TreeModelForward(input,training)
     local firstRoute
     if (firstDecisionOutput[1] >= 0) then
         firstRoute = 1
-        print(firstRoute)
+        --print(firstRoute)
+        --print(firstDecisionOutput[1])
     else
         firstRoute = 2
-        print(firstRoute)
+        --print(firstRoute)
+        --print(firstDecisionOutput[1])
     end
     local secondLayerOutput = modelNode[2][firstRoute]:forward(firstLayerOutput)
     local secondDecisionOutput = decisionTreeNode[2][firstRoute]:forward(secondLayerOutput)
     local secondRoute
     if (secondDecisionOutput[1] >= 0) then
         secondRoute = (firstRoute * 2 - 1)
-        print(secondRoute)
+        --print(secondRoute)
+        --print(secondDecisionOutput[1])
     else
         secondRoute = (firstRoute * 2)
-        print(secondRoute)
+        --print(secondRoute)
+        --print(secondDecisionOutput[1])
     end
     local thirdLayerOutput = modelNode[3][secondRoute]:forward(secondLayerOutput)
     return thirdLayerOutput,firstDecisionOutput,secondDecisionOutput,firstRoute,secondRoute

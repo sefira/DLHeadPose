@@ -25,7 +25,7 @@ function testInTrainData()
         local target = train_data[t].labels
 
         -- test sample
-        local pred = TreeModelForward(input)
+        local pred,_,_,_,_ = TreeModelForward(input)
         confusion:add(pred, target)
     end
 
@@ -68,7 +68,7 @@ function testInTestData()
         local target = test_data[t].labels
 
         -- test sample
-        local pred = TreeModelForward(input)
+        local pred,_,_,_,_ = TreeModelForward(input)
         confusion:add(pred, target)
     end
     

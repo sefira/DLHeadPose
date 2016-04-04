@@ -9,10 +9,11 @@ print '==> executing all'
 
 -------------------configuration------------------
 liveplot = false
-enableCuda = false 
+enableCuda = false
 ClassNLL = true -- use classNLL or KL
 loadModel = false -- load model node from saved nodefile
 inheritModel = true -- inherit model node from parent model that a CNN model trained without tree
+trainModel = false -- determine the model whether need to be trained
 
 if enableCuda then
     print "CUDA enable"
@@ -40,25 +41,27 @@ loss_target = 0.01
 loss_difference_target = 0.0001
 confusion_totalValid_target = 95
 
--- optimization
-epoch = 1
-for i = 1, 1000 do
---while true do
-    train()
-    print(old_loss)
-    print(current_loss)
-    print(current_confusion_totalValid)
-    print(torch.abs(old_loss - current_loss))
-    if (i % 100 == 0) then
-        --testInTrainData()
-        testInTestData()
-    end
+if trainModel then
+    -- optimization
+    epoch = 1
+    for i = 1, 1000 do
+    --while true do
+        train()
+        print(old_loss)
+        print(current_loss)
+        print(current_confusion_totalValid)
+        print(torch.abs(old_loss - current_loss))
+        if (i % 100 == 0) then
+            --testInTrainData()
+            testInTestData()
+        end
 
-    --if (current_loss < loss_target) and (torch.abs(old_loss - current_loss) < loss_difference_target) and (current_confusion_totalValid > 95) then 
-    if (torch.abs(old_loss - current_loss) < loss_difference_target) and (current_confusion_totalValid > confusion_totalValid_target) then 
-        testInTestData()
-        print("############## final test ######################")
-        break
+        --if (current_loss < loss_target) and (torch.abs(old_loss - current_loss) < loss_difference_target) and (current_confusion_totalValid > 95) then 
+        if (torch.abs(old_loss - current_loss) < loss_difference_target) and (current_confusion_totalValid > confusion_totalValid_target) then 
+            testInTestData()
+            print("############## final test ######################")
+            break
+        end
+        old_loss = current_loss
     end
-    old_loss = current_loss
 end
