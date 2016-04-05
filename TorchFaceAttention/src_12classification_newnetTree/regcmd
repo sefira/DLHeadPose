@@ -83,8 +83,10 @@ bla = model[branch]:backward(input, df_do)
 print(gradParameters[branch])
 
 -----------------------------------------------
--- with Node
+-- with Node, single root
 -- in this example each gradParameters[x] update
+--
+-- this pattern will be used to build my Tree CNN
 --
 require 'torch'
 require 'nn'
@@ -115,7 +117,7 @@ bla = gradParameters[1]:zero()
 bla = gradParameters[2]:zero()
 bla = gradParameters[3]:zero()
 
-branch = 2
+branch = 1
 output = TreeModels[branch]:forward(input)
 err = criterion:forward(output, target)
 df_do = criterion:backward(output, target)
@@ -124,7 +126,7 @@ bla = TreeModels[branch]:backward(input, df_do)
 print(gradParameters[3])
 
 --------------------------------------------------
--- without Node
+-- without Node, single root
 -- in this example each gradParameters[x] update
 --
 require 'torch'
@@ -194,10 +196,68 @@ parameters[2],gradParameters[2] = TreeModels[2]:getParameters()
 bla = gradParameters[1]:zero()
 bla = gradParameters[2]:zero()
 
-branch = 1
+branch = 2
 output = TreeModels[branch]:forward(input)
 err = criterion:forward(output, target)
 df_do = criterion:backward(output, target)
 print(gradParameters[branch])
 bla = TreeModels[branch]:backward(input, df_do)
 print(gradParameters[branch])
+
+------------------------------------------------------------
+-- with Node, mulit-root shared
+-- in this example each parameters[x] shared
+--
+require 'torch'
+require 'nn'
+modelNode = {}
+modelNode[1] = {nn.Sequential(),nn.Sequential()}
+modelNode[2] = {nn.Sequential(),nn.Sequential()}
+modelNode[1][1]:add(nn.Linear(4, 2));
+modelNode[1][2]:add(nn.Linear(4, 2));
+modelNode[1][2]:share(modelNode[1][1],'weight','bias');
+modelNode[2][1]:add(nn.Linear(2, 1))
+modelNode[2][2]:add(nn.Linear(2, 1))
+TreeModels = {nn.Sequential(),nn.Sequential()}
+function modelGenerater(branchNum)
+    TreeModels[branchNum]:add(modelNode[1][branchNum])
+    TreeModels[branchNum]:add(modelNode[2][branchNum])
+end
+for i = 1,2 do 
+    modelGenerater(i)
+end
+
+modelNode[1][1]:get(1).bias:fill(1);
+modelNode[1][1]:get(1).bias
+modelNode[1][2]:get(1).bias
+
+------------------------------------------------------------
+-- with Node, mulit-root shared
+-- in this example each parameters[x] not shared
+--
+require 'torch'
+require 'nn'
+modelNode = {}
+modelNode[1] = {nn.Sequential(),nn.Sequential()}
+modelNode[2] = {nn.Sequential(),nn.Sequential()}
+modelNode[1][1]:add(nn.Linear(4, 2));
+modelNode[1][2]:add(nn.Linear(4, 2));
+modelNode[1][2]:share(modelNode[1][1],'weight','bias');
+modelNode[2][1]:add(nn.Linear(2, 1))
+modelNode[2][2]:add(nn.Linear(2, 1))
+TreeModels = {nn.Sequential(),nn.Sequential()}
+function modelGenerater(branchNum)
+    TreeModels[branchNum]:add(modelNode[1][branchNum])
+    TreeModels[branchNum]:add(modelNode[2][branchNum])
+end
+for i = 1,2 do 
+    modelGenerater(i)
+end
+parameters = {}
+gradParameters = {}
+parameters[1],gradParameters[1] = TreeModels[1]:getParameters()
+parameters[2],gradParameters[2] = TreeModels[2]:getParameters()
+modelNode[1][2]:share(modelNode[1][1],'weight','bias');
+modelNode[1][1]:get(1).bias:fill(1);
+modelNode[1][1]:get(1).bias
+modelNode[1][2]:get(1).bias
