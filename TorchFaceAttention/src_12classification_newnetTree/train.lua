@@ -15,18 +15,23 @@ testLogger = optim.Logger(paths.concat('results', 'test.log'))
 -- into a 1-dim vector
 parameters = {}
 gradParameters = {}
+-- 1: parameters of first Node, 2~3: parameters of second Node, 4~7: parameters of third Node, 8~10: parameters of decisionTree Node
+-- 1: gradParameters of first Node, 2~3: gradParameters of second Node, 4~7: gradParameters of third Node, 8~10: gradParameters of decisionTree Node
 if TreeModels then
-    parameters[1],gradParameters[1] = TreeModels[1]:getParameters()
-    parameters[2],gradParameters[2] = TreeModels[2]:getParameters()
-    parameters[3],gradParameters[3] = TreeModels[3]:getParameters()
-    parameters[4],gradParameters[4] = TreeModels[4]:getParameters()
-    --parameters[5],gradParameters[5] = decisionTreeNode[1][1]:getParameters()
-    --parameters[6],gradParameters[6] = decisionTreeNode[2][1]:getParameters()
-    --parameters[7],gradParameters[7] = decisionTreeNode[2][2]:getParameters()
+    countParameters = 1
+    for i = 1,#modelNode do
+        for j = 1,#modelNode[i] do 
+            parameters[countParameters],gradParameters[countParameters] = modelNode[i][j]:getParameters()
+            countParameters = countParameters + 1
+        end
+    end
+    --for i = 1,#decisionTreeNode do
+    --    for j = 1,#decisionTreeNode[i] do
+    --        parameters[countParameters],gradParameters[countParameters] =  decisionTreeNode[i][j]:getParameters()
+    --        countParameters = countParameters + 1
+    --    end
+    --end
 end
-
-parametersList = flattenParameters(parameters)
-gradParametersList = flattenParameters(gradParameters)
 
 ----------------------------------------------------------------------
 print '==> configuring optimizer'
@@ -80,28 +85,33 @@ function train()
         end
         -- create closure to evaluate f(X) and df/dX
         local feval = function(x)
-                        -- get new parametersList
-                        if x ~= parametersList then
-                            parametersList:copy(x)
+                        -- get new parameters
+                        for i=1,#parameters do
+                            if x[i] ~= parameters[i] then
+                                parameters[i]:copy(x[i])
+                            end
                         end
 
                         -- reset gradients
-                        gradParametersList:zero()
-
+                        for i=1,#gradParameters do
+                            gradParameters[i]:zero()
+                        end
                         -- f is the average of all criterions, actually won't be used in sgd.lua
                         local f = 0
-
                         local arrivedCount = {}
-                        for i=1,4 do
+                        for i=1,#gradParameters do
                             arrivedCount[i] = 0
                         end
+
                         -- evaluate function for complete mini batch
                         for i = 1,#inputs do
                             -- estimate f
                             local thirdLayerOutput,firstDecisionOutput,secondDecisionOutput,firstRoute,secondRoute = TreeModelForward(inputs[i])
                             local err = criterion:forward(thirdLayerOutput, targets[i])
                             f = f + err
-                            arrivedCount[secondRoute] = arrivedCount[secondRoute] + 1
+                            arrivedCount[1] = arrivedCount[1] + 1
+                            arrivedCount[firstRoute + 1] = arrivedCount[firstRoute + 1] + 1
+                            arrivedCount[secondRoute + 3] = arrivedCount[secondRoute + 3] + 1
                             -- estimate df/dW
                             local df_do = criterion:backward(thirdLayerOutput, targets[i])
                             TreeModels[secondRoute]:backward(inputs[i], df_do)
@@ -111,15 +121,17 @@ function train()
                         end
 
                         -- normalize gradients and f(X)
-                        gradParametersList:div(#inputs)
+                        for i=1,#gradParameters do
+                            gradParameters:div(arrivedCount[i])
+                        end
                         f = f/#inputs
 
                         -- return f and df/dX
-                        return f,gradParametersList
+                        return f,gradParameters
                     end
 
         -- optimize on current mini-batch
-        _,fs = optimMethod(feval, parametersList, optimState)
+        _,fs = optimMethod(feval, parameters, optimState)
         
         current_loss = current_loss + fs[1]
     end
