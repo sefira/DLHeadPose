@@ -122,7 +122,7 @@ function train()
                         end
 
                         -- normalize gradients and f(X)
-                        print(arrivedCount)
+                        --print(arrivedCount)
                         for i=1,#gradParameters do
                             gradParameters[i]:div(arrivedCount[i])
                         end
