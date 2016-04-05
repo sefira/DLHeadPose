@@ -8,7 +8,6 @@ function equal(a,b)
    end
 end
 
-
 _flattenTensorBuffer = {}
 function flattenParameters(parameters)
 
@@ -79,9 +78,9 @@ function flattenParameters(parameters)
 
    -- 5. allow garbage collection
    storages = nil
-   --for k = 1,#parameters do
-   --    parameters[k]:set(Tensor())
-   --end
+   for k = 1,#parameters do
+       parameters[k]:set(Tensor())
+   end
 
    -- 6. compact the flattened parameters if there were holes
    if nUsedParameters ~= nParameters then
@@ -101,12 +100,12 @@ function flattenParameters(parameters)
    end
 
    -- 7. fix up the parameter tensors to point at the flattened parameters
-   --for k = 1,#parameters do
-   --   parameters[k]:set(flatParameters:storage(),
-   --       parameterMeta[k].storageOffset,
-   --       parameterMeta[k].size,
-   --       parameterMeta[k].stride)
-   --end
+   for k = 1,#parameters do
+      parameters[k]:set(flatParameters:storage(),
+          parameterMeta[k].storageOffset,
+          parameterMeta[k].size,
+          parameterMeta[k].stride)
+   end
 
    return flatParameters
 end

@@ -16,7 +16,10 @@ output = model:forward(input)
 target
 output
 --err
-
+--------------------------------------------------
+-- two different model and want to flattenParameters
+-- in this example flattenParameters failed
+--
 require 'cunn'
 require 'cutorch'
 require 'torch'
@@ -48,7 +51,10 @@ TreeModels[1]:backward(inputs, dfdx)
 parameters1,gradParameters1
 TreeModels[1]:getParameters()
 
-
+----------------------------------------------
+-- two different model
+-- in this example each gradParameters[x] update
+--
 require 'torch'
 require 'nn'
 dofile 'utils.lua'
@@ -63,14 +69,135 @@ gradParameters = {}
 parameters[1],gradParameters[1] = model[1]:getParameters()
 parameters[2],gradParameters[2] = model[2]:getParameters()
 bla = gradParameters[1]:zero()
-parametersList = flattenParameters(parameters)
-gradParametersList = flattenParameters(gradParameters)
-bla = gradParametersList:zero()
-
-output = model[1]:forward(input)
+bla = gradParameters[2]:zero()
+--parametersList = flattenParameters(parameters)
+--gradParametersList = flattenParameters(gradParameters)
+--bla = gradParametersList:zero()
+branch = 2
+output = model[branch]:forward(input)
 err = criterion:forward(output, target)
 df_do = criterion:backward(output, target)
 print("print(gradParametersList):")
-print(gradParameters[1])
-bla = model[1]:backward(input, df_do)
-print(gradParameters[1])
+print(gradParameters[branch])
+bla = model[branch]:backward(input, df_do)
+print(gradParameters[branch])
+
+-----------------------------------------------
+-- with Node
+-- in this example each gradParameters[x] update
+--
+require 'torch'
+require 'nn'
+
+criterion = nn.MSECriterion()
+input = torch.ones(4)
+target = torch.ones(1) * 10
+modelNode = {}
+modelNode[1] = {nn.Sequential()}
+modelNode[2] = {nn.Sequential(),nn.Sequential()}
+modelNode[1][1]:add(nn.Linear(4, 2))
+modelNode[2][1]:add(nn.Linear(2, 1))
+modelNode[2][2] = modelNode[2][1]:clone()
+TreeModels = {nn.Sequential(),nn.Sequential()}
+function modelGenerater(branchNum)
+    TreeModels[branchNum]:add(modelNode[1][1])
+    TreeModels[branchNum]:add(modelNode[2][branchNum])
+end
+for i = 1,2 do 
+    modelGenerater(i)
+end
+parameters = {}
+gradParameters = {}
+parameters[1],gradParameters[1] = modelNode[2][1]:getParameters()
+parameters[2],gradParameters[2] = modelNode[2][2]:getParameters()
+parameters[3],gradParameters[3] = modelNode[1][1]:getParameters()
+bla = gradParameters[1]:zero()
+bla = gradParameters[2]:zero()
+bla = gradParameters[3]:zero()
+
+branch = 2
+output = TreeModels[branch]:forward(input)
+err = criterion:forward(output, target)
+df_do = criterion:backward(output, target)
+print(gradParameters[3])
+bla = TreeModels[branch]:backward(input, df_do)
+print(gradParameters[3])
+
+--------------------------------------------------
+-- without Node
+-- in this example each gradParameters[x] update
+--
+require 'torch'
+require 'nn'
+criterion = nn.MSECriterion()
+input = torch.ones(4)
+target = torch.ones(1) * 10
+root = nn.Linear(4, 2)
+leaf = {}
+leaf[1] = nn.Linear(2, 1)
+leaf[2] = nn.Linear(2, 1)
+TreeModels = {nn.Sequential(),nn.Sequential()}
+function modelGenerater(branchNum)
+    TreeModels[branchNum]:add(root)
+    TreeModels[branchNum]:add(leaf[branchNum])
+end
+for i = 1,2 do 
+    modelGenerater(i)
+end
+parameters = {}
+gradParameters = {}
+parameters[1],gradParameters[1] = leaf[1]:getParameters()
+parameters[2],gradParameters[2] = leaf[2]:getParameters()
+parameters[3],gradParameters[3] = root:getParameters()
+bla = gradParameters[1]:zero()
+bla = gradParameters[2]:zero()
+bla = gradParameters[3]:zero()
+
+branch = 2
+output = TreeModels[branch]:forward(input)
+err = criterion:forward(output, target)
+df_do = criterion:backward(output, target)
+print(gradParameters[3])
+bla = TreeModels[branch]:backward(input, df_do)
+print(gradParameters[3])
+
+-----------------------------------------------
+-- with Node, mulit-root shared
+-- in this example each gradParameters[x] update
+--
+require 'torch'
+require 'nn'
+
+criterion = nn.MSECriterion()
+input = torch.ones(4)
+target = torch.ones(1) * 10
+modelNode = {}
+modelNode[1] = {nn.Sequential(),nn.Sequential()}
+modelNode[2] = {nn.Sequential(),nn.Sequential()}
+modelNode[1][1]:add(nn.Linear(4, 2))
+modelNode[1][2]:add(nn.Linear(4, 2))
+modelNode[1][2]:share(modelNode[1][1],'weight','bias');
+modelNode[2][1]:add(nn.Linear(2, 1))
+modelNode[2][2]:add(nn.Linear(2, 1))
+TreeModels = {nn.Sequential(),nn.Sequential()}
+function modelGenerater(branchNum)
+    TreeModels[branchNum]:add(modelNode[1][branchNum])
+    TreeModels[branchNum]:add(modelNode[2][branchNum])
+end
+for i = 1,2 do 
+    modelGenerater(i)
+end
+parameters = {}
+gradParameters = {}
+parameters[1],gradParameters[1] = TreeModels[1]:getParameters()
+parameters[2],gradParameters[2] = TreeModels[2]:getParameters()
+bla = gradParameters[1]:zero()
+bla = gradParameters[2]:zero()
+
+branch = 1
+output = TreeModels[branch]:forward(input)
+err = criterion:forward(output, target)
+df_do = criterion:backward(output, target)
+print(gradParameters[branch])
+bla = TreeModels[branch]:backward(input, df_do)
+print(gradParameters[branch])
