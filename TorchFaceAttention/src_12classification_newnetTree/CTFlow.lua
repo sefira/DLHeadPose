@@ -12,8 +12,8 @@ liveplot = false
 enableCuda = false
 ClassNLL = true -- use classNLL or KL
 loadModel = false -- load model node from saved nodefile
-inheritModel = true -- inherit model node from parent model that a CNN model trained without tree
-trainModel = false -- determine the model whether need to be trained
+inheritModel = false -- inherit model node from parent model that a CNN model trained without tree
+trainModel = true -- determine the model whether need to be trained
 
 if enableCuda then
     print "CUDA enable"

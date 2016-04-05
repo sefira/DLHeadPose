@@ -42,7 +42,8 @@ optimState = {
     momentum = 0,
     learningRateDecay = 1e-7
 }
-optimMethod = optim.sgd
+--optimMethod = optim.sgd
+optimMethod = multiModelSgd
 
 ----------------------------------------------------------------------
 print '==> defining training procedure'
@@ -100,7 +101,7 @@ function train()
                         local f = 0
                         local arrivedCount = {}
                         for i=1,#gradParameters do
-                            arrivedCount[i] = 0
+                            arrivedCount[i] = 1
                         end
 
                         -- evaluate function for complete mini batch
@@ -121,8 +122,9 @@ function train()
                         end
 
                         -- normalize gradients and f(X)
+                        print(arrivedCount)
                         for i=1,#gradParameters do
-                            gradParameters:div(arrivedCount[i])
+                            gradParameters[i]:div(arrivedCount[i])
                         end
                         f = f/#inputs
 
