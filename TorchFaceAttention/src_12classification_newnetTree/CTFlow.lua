@@ -9,8 +9,8 @@ print '==> executing all'
 
 -------------------configuration------------------
 liveplot = false
-enableCuda = true --*************************
 ClassNLL = true -- use classNLL or KL
+enableCuda = false --*************************
 loadModel = false -- load model node from saved nodefile
 inheritModel = false -- inherit model node from parent model that a CNN model trained without tree
 trainModel = true -- determine the model whether need to be trained

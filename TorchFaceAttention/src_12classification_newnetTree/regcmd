@@ -261,3 +261,28 @@ modelNode[1][2]:share(modelNode[1][1],'weight','bias');
 modelNode[1][1]:get(1).bias:fill(1);
 modelNode[1][1]:get(1).bias
 modelNode[1][2]:get(1).bias
+
+-------------------------------------------------------
+require 'torch'
+require 'nn'
+
+criterion = nn.MSECriterion()
+inputs = torch.ones(4)*5
+i = -1
+inputs:apply(function()
+  i = i + 1
+  return i
+end)
+
+target = torch.ones(1)*10
+model=(nn.Linear(4,1))
+
+b:zero()
+output = model:forward(inputs)
+err = criterion:forward(output, target)
+dfdx = criterion:backward(output, target)
+output
+err
+dfdx
+model:backward(inputs, dfdx)
+a,b = model:getParameters()

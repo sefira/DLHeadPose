@@ -25,12 +25,12 @@ if TreeModels then
             countParameters = countParameters + 1
         end
     end
-    --for i = 1,#decisionTreeNode do
-    --    for j = 1,#decisionTreeNode[i] do
-    --        parameters[countParameters],gradParameters[countParameters] =  decisionTreeNode[i][j]:getParameters()
-    --        countParameters = countParameters + 1
-    --    end
-    --end
+    for i = 1,#decisionTreeNode do
+        for j = 1,#decisionTreeNode[i] do
+            parameters[countParameters],gradParameters[countParameters] =  decisionTreeNode[i][j]:getParameters()
+            countParameters = countParameters + 1
+        end
+    end
 end
 
 ----------------------------------------------------------------------
@@ -101,18 +101,57 @@ function train()
                         local f = 0
                         local arrivedCount = {}
                         for i=1,#gradParameters do
-                            arrivedCount[i] = 1
+                            arrivedCount[i] = 0
+                        end
+
+                        local statusOfDecision = {}
+                        statusOfDecision[1] = {
+                            sumOfPhi = {torch.zeros(1),torch.zeros(1)},
+                            sumOfPhiX = torch.zeros(14*14*16),
+                            sumOfPhiSqrt = torch.zeros(1),
+                            sumOfX = {torch.zeros(14*14*16),torch.zeros(14*14*16)},
+                            gradWeight = torch.Tensor(14*14*16),
+                            gradBias = torch.Tensor(1),
+                            err = 100
+                        }
+                        for i=2,3 do
+                            statusOfDecision[i] = {
+                                sumOfPhi = {torch.zeros(1),torch.zeros(1)},
+                                sumOfPhiX = torch.zeros(6*6*32),
+                                sumOfPhiSqrt = torch.zeros(1),
+                                sumOfX = {torch.zeros(6*6*32),torch.zeros(6*6*32)},
+                                gradWeight = torch.Tensor(6*6*32),
+                                gradBias = torch.Tensor(1),
+                                err = 100
+                            }
                         end
 
                         -- evaluate function for complete mini batch
                         for i = 1,#inputs do
                             -- estimate f
-                            local thirdLayerOutput,firstDecisionOutput,secondDecisionOutput,firstRoute,secondRoute = TreeModelForward(inputs[i])
+                            local thirdLayerOutput,firstDecisionInput,firstDecisionOutput,secondDecisionInput,secondDecisionOutput,firstRoute,secondRoute = TreeModelForward(inputs[i])
                             local err = criterion:forward(thirdLayerOutput, targets[i])
                             f = f + err
+                            
                             arrivedCount[1] = arrivedCount[1] + 1
                             arrivedCount[firstRoute + 1] = arrivedCount[firstRoute + 1] + 1
                             arrivedCount[secondRoute + 3] = arrivedCount[secondRoute + 3] + 1
+
+                            statusOfDecision[1].sumOfPhi[firstRoute]:   add(firstDecisionOutput)
+                            statusOfDecision[1].sumOfPhiX:              add(firstDecisionInput * firstDecisionOutput)
+                            statusOfDecision[1].sumOfPhiSqrt:           add(firstDecisionOutput * firstDecisionOutput)
+                            statusOfDecision[1].sumOfX[firstRoute]:     add(firstDecisionInput)
+                            --print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                            --print(firstRoute)
+                            --print(firstDecisionOutput)
+                            --print(firstDecisionOutput * firstDecisionOutput)
+                            --print(firstDecisionInput[1])
+
+                            statusOfDecision[firstRoute + 1].sumOfPhi[((secondRoute + 1) % 2 + 1)]: add(secondDecisionOutput)
+                            statusOfDecision[firstRoute + 1].sumOfPhiX:                             add(secondDecisionInput * secondDecisionOutput)
+                            statusOfDecision[firstRoute + 1].sumOfPhiSqrt:                          add(secondDecisionOutput * secondDecisionOutput)
+                            statusOfDecision[firstRoute + 1].sumOfX[((secondRoute + 1) % 2 + 1)]:   add(secondDecisionInput)
+
                             -- estimate df/dW
                             local df_do = criterion:backward(thirdLayerOutput, targets[i])
                             TreeModels[secondRoute]:backward(inputs[i], df_do)
@@ -120,6 +159,14 @@ function train()
                             -- update confusion
                             confusion:add(thirdLayerOutput, targets[i])
                         end
+
+                        for i=1,#gradParameters do
+                            if arrivedCount[i] <= 0 then
+                                arrivedCount[i] = 1
+                            end
+                        end
+                        -- decision tree Nnode
+                        DecisionNodesBackward(statusOfDecision,arrivedCount,gradParameters)
 
                         -- normalize gradients and f(X)
                         --print(arrivedCount)
