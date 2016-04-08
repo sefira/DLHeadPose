@@ -104,7 +104,7 @@ function train()
                             arrivedCount[i] = 0
                         end
 
-                        local statusOfDecision = {}
+                        statusOfDecision = {}
                         statusOfDecision[1] = {
                             sumOfPhi = {torch.zeros(1),torch.zeros(1)},
                             sumOfPhiX = torch.zeros(14*14*16),
@@ -125,11 +125,23 @@ function train()
                                 err = 100
                             }
                         end
+                        if enableCuda then
+                            for i=1,#statusOfDecision do
+                                statusOfDecision[i].sumOfPhi[1] = statusOfDecision[i].sumOfPhi[1]:cuda()
+                                statusOfDecision[i].sumOfPhi[2] = statusOfDecision[i].sumOfPhi[2]:cuda()
+                                statusOfDecision[i].sumOfPhiX = statusOfDecision[i].sumOfPhiX:cuda()
+                                statusOfDecision[i].sumOfPhiSqrt = statusOfDecision[i].sumOfPhiSqrt:cuda()
+                                statusOfDecision[i].sumOfX[1] = statusOfDecision[i].sumOfX[1]:cuda()
+                                statusOfDecision[i].sumOfX[2] = statusOfDecision[i].sumOfX[2]:cuda()
+                                statusOfDecision[i].gradWeight = statusOfDecision[i].gradWeight:cuda()
+                                statusOfDecision[i].gradBias = statusOfDecision[i].gradBias:cuda()
+                            end
+                        end
 
                         -- evaluate function for complete mini batch
                         for i = 1,#inputs do
                             -- estimate f
-                            local thirdLayerOutput,firstDecisionInput,firstDecisionOutput,secondDecisionInput,secondDecisionOutput,firstRoute,secondRoute = TreeModelForward(inputs[i])
+                            thirdLayerOutput,firstDecisionInput,firstDecisionOutput,secondDecisionInput,secondDecisionOutput,firstRoute,secondRoute = TreeModelForward(inputs[i])
                             local err = criterion:forward(thirdLayerOutput, targets[i])
                             f = f + err
                             

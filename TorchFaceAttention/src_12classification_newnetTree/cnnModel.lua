@@ -180,7 +180,6 @@ function TreeModelForward(input,training)
     return thirdLayerOutput,firstDecisionInput,firstDecisionOutput[1],secondDecisionInput,secondDecisionOutput[1],firstRoute,secondRoute
 end
 
-
 function DecisionNodesBackward(statusOfDecision, arrivedCount, gradParameters)
     -- greater than 7 indicate there are dicision tree node parameters
     if #gradParameters > 7 then
@@ -200,7 +199,7 @@ function DecisionNodesBackward(statusOfDecision, arrivedCount, gradParameters)
             local sumOfPhiRight = statusOfDecision[i].sumOfPhi[2][1]
             local _diffAvgSumOfPhi = (sumOfPhiLeft / arrivedCount[i*2]) - (sumOfPhiRight / arrivedCount[i*2 + 1])
             if _diffAvgSumOfPhi == 0 then
-                print(i.." not arrived")
+                --print(i.." not arrived")
                 statusOfDecision[i].gradWeight:zero()
                 statusOfDecision[i].gradBias:zero()
                 gradParameters[#gradParameters - 3 + i]:zero()
@@ -220,13 +219,10 @@ function DecisionNodesBackward(statusOfDecision, arrivedCount, gradParameters)
                 gradParameters[#gradParameters - 3 + i]:copy(torch.cat(statusOfDecision[i].gradWeight, statusOfDecision[i].gradBias))
                 local old_err = statusOfDecision[i].err
                 statusOfDecision[i].err = _sumOfPhiSqrt / arrivedCount[i] / (_diffAvgSumOfPhi ^ 2)
-                if old_err > statusOfDecision[i].err then
-                    print(old_err)
-                    print(statusOfDecision[i].err)
-                    (_diffAvgSumOfPhi*_sumOfPhiX)
+                --print("statusOfDecision[" ..i.."].err")
+                if lossOfDecisionNodes then
+                    lossOfDecisionNodes[i][#lossOfDecisionNodes[i]+1] = statusOfDecision[i].err
                 end
-                print("statusOfDecision[" ..i.."].err")
-                print(statusOfDecision[i].err)
             end
         end
     end
